@@ -1,13 +1,13 @@
 package MemoryManagement;
 
-public class Page {
-	public final static int PAGESIZE = 4;
+import MainBoot.BootLoader;
+
+public class Page implements Cloneable{
 	private int pageIndex;
 	private int pid;
-	private String[] pageContent;
+	private String[] pageContent = new String[BootLoader.PAGESIZE];
 	private boolean pBit;
 	private boolean rBit;
-	
 	
 	
 	//Konstruktoren
@@ -72,5 +72,11 @@ public class Page {
 	public int getPid() {
 		return pid;
 	}
-
+	
+	
+	
+	// gibt Kopie des Eingabeobjekts zurück
+	public Page clone() {
+		return new Page(this.pageIndex, this.pid, this.pBit, this.rBit, this.pageContent);
+	}
 }

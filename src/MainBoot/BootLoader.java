@@ -5,7 +5,9 @@ import Hardware.*;
 import java.io.*;
 
 public class BootLoader {
-  static int memSize = 8;
+  public final static int MEMSIZE = 8;
+  public final static int PAGESIZE = 4;
+  public final static int VIRTMEMSIZE = 32;
   
   static public class ShutdownException extends Exception{};
   
@@ -13,7 +15,7 @@ public class BootLoader {
     SysLogger.openLog();
     /* Die Instanzen fuer die verschiedenen Programmteile werden hier erzeugt
      * und durchgereicht. */
-    MainMemory memory = new MainMemory( memSize );
+    MainMemory memory = new MainMemory( MEMSIZE );
     MMU mmu = new MMU( memory ); // Nur die MMU hat Zugriff auf den Hauptspeicher
     CPU cpu = new CPU( mmu );
     MemoryManagerIF memoryManager = new MemoryManager( memory );
