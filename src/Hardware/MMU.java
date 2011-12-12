@@ -41,7 +41,7 @@ public class MMU {
 			throw new AccessViolation();
 		}
 		int realAddress = address + regSet.getBase();
-		memory.setContent(realAddress, value);
+		setContent(realAddress, value);
 	}
 
 	public void setAbsoluteAddress(int address, String value) {
@@ -104,7 +104,7 @@ public class MMU {
 	}
 	
 	public void setContent(Page page) {
-
+		
 	}
 
 	public String getContent(String address) {

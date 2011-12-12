@@ -43,7 +43,7 @@ public class MemoryManager implements MemoryManagerIF{
         while (line != null){
           //Debug:  
           //line = input.readLine();
-          memory.setContent( n,line );
+          memory.setContent( line );
           n++;
           line = input.readLine();
         }
