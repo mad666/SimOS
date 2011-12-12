@@ -4,8 +4,34 @@ import java.util.ArrayList;
 import MemoryManagement.Page;
 
 public class SecondaryStorage {
+	
 	ArrayList<Page[]> storage;
 	
+	
+	
+	//Konstruktoren
+	public SecondaryStorage() {
+		this.storage = new ArrayList<Page[]>();
+	}
+	public SecondaryStorage(int size) {
+		this.storage = new ArrayList<Page[]>(size);
+	}
+	
+	
+	
+	
+	//Getter & Setter
+	public Page[] getStorage(int index) {
+		return storage.get(index);
+	}
+	//SeitenArray an bestimmten Index einfügen
+	public void setStorage(Page[] pages, int index) {
+		storage.add(index, pages);
+	}
+	
+	
+	
+	//Funktionen
 	//Element an Array anhängen
 	public void addElement(Page[] pages) {
 		storage.add(pages);
@@ -25,16 +51,18 @@ public class SecondaryStorage {
 	}
 	
 	//SeitenArray zu einem Prozess löschen
-	public void deleteElementProc(int pid) {
+	public void deleteElementByPid(int pid) {
 		deleteElement(searchElement(pid));
 	}
 	
-	//Getter & Setter
-	public Page[] getStorage(int index) {
-		return storage.get(index);
+	//einzelne Seite aktualisieren über pid
+	public void changePageByPid(int pid, int index, Page page) {
+		changePageByIndex( searchElement(pid), index, page);
 	}
-	//SeitenArray an bestimmten Index einfügen
-	public void setStorage(Page[] pages, int index) {
-		storage.add(index, pages);
+	//einzelne Seite aktualisieren über index
+	public void changePageByIndex(int listIndex, int arrayIndex, Page page ) {
+		getStorage(listIndex)[arrayIndex] = page;
 	}
+	
+	
 }
