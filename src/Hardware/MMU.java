@@ -11,6 +11,7 @@ import MainBoot.BootLoader;
 import MainBoot.SysLogger;
 import MemoryManagement.Page;
 import MemoryManagement.PageTable;
+import Scheduler.Scheduler;
 
 public class MMU {
 	private MainMemory memory;
@@ -44,7 +45,11 @@ public class MMU {
 	}
 
 	public void setAbsoluteAddress(int address, String value) {
-		setContent(resolveAddress(address), value);
+		try {
+			setContent(resolveAddress(address), value);
+		} catch (AccessViolation a) {
+			System.err.println(a);
+		}
 	}
 
 	public int resolveAddress(String address) throws AccessViolation {
@@ -52,16 +57,14 @@ public class MMU {
 	}
 	
 	public int resolveAddress(int address) throws AccessViolation {
-		int i;
-		if(BootLoader.PAGESIZE < BootLoader.VIRTMEMSIZE) {
-			i=String.valueOf(BootLoader.VIRTMEMSIZE).length();
-		}
-		String sInd = String.format("%"+0+i+"d", resolvePageIndex(address));
-		String sOff = String.valueOf(resolvePageIndex(address)) + String.valueOf(resolveOffset(address));
-		//SysLogger.writeLog(0, "MMU.resolveAddress: access violation: "
-		//		+ address);
-		//throw new AccessViolation();
-		return Integer.parseInt((sInd+sOff));
+//		int i;
+//		if(BootLoader.PAGESIZE < BootLoader.VIRTMEMSIZE) {
+//			i=String.valueOf(BootLoader.VIRTMEMSIZE).length();
+//		}
+		//String sInd = String.format("%"+0+i+"d", resolvePageIndex(address));
+		String sInd = String.format("%04d", resolvePageIndex(address));
+		String sOff = String.format("%04d", resolveOffset(address));
+		return Integer.parseInt(sInd+sOff);
 		
 	}
 	public int resolvePageIndex(String address) throws AccessViolation {
@@ -85,17 +88,21 @@ public class MMU {
 	}
 
 	public String getMemoryCell(int address) throws AccessViolation {
-		return getContent(resolvePageIndex(address), resolveOffset(address));
+		return getContent(address);
 
 	}
 
-	public void dumpMemory(int limit) {
-		SysLogger.writeLog(1, "MMU.dumpMemory");
-		for (int i = 0; i < limit; i++) {
-			SysLogger.writeLog(1, i + ": " + memory.getContent(i));
-		}
-	}
+//	public void dumpMemory(int limit) {
+//		SysLogger.writeLog(1, "MMU.dumpMemory");
+//		for (int i = 0; i < limit; i++) {
+//			SysLogger.writeLog(1, i + ": " + memory.getContent(i));
+//		}
+//	}
 
+	public void setContent(int address, String value) {
+
+	}
+	
 	public void setContent(Page page) {
 
 	}
@@ -105,6 +112,13 @@ public class MMU {
 	}
 
 	public String getContent(int address) {
+		String index=Integer.toString(address).substring(0, 3);
+		String offset=Integer.toString(address).substring(4, 7);
+		int ind = Integer.parseInt(index);
+		int off = Integer.parseInt(offset);
+		// wie kommen wir hier an die PID? Die CPU kennt diese auf jeden fall
+		
+
 		return "";
 	}
 

@@ -34,8 +34,8 @@ public class MemoryManager implements MemoryManagerIF{
         
         // TBD: Prüfen, ob das Programm noch in den Speicher passt.
         
-        pcb.getRegisterSet().setBase( nextFree );
-        pcb.getRegisterSet().setLimit( nextFree + size - 1 );
+        //pcb.getRegisterSet().setBase( nextFree );
+        //pcb.getRegisterSet().setLimit( nextFree + size - 1 );
         pcb.getRegisterSet().setProgramCounter( 0 );
 
         int n = nextFree;

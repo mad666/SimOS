@@ -74,7 +74,7 @@ public class PCB {
 
   //toString
   public String toString(){
-    return "[pid " + pid + " priority " + priority + " base " + reg.getBase() + " limit " + reg.getLimit() + "]";
+	  return "[pid " + pid + " priority " + priority + " base " + reg.getBase() + " limit " + reg.getLimit() + "]";
   }
 
 }
