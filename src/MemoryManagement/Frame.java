@@ -1,7 +1,6 @@
 package MemoryManagement;
 
 public class Frame {
-	public final static int FRAMESIZE = 4;
 	private int frameID;
 	private Page frameContent;
 	

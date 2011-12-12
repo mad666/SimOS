@@ -13,12 +13,23 @@ public class PageTable {
 	public PageTable(Page[] pages, int size) {
 		//this.pages = pages.clone();
 		//this.pages = pages;
-		this.size = size;
+		setSize(size);
 	}
 	
 	//Getter & Setter
 	public Page getPage(int pageIndex) {
 		return pages[pageIndex];
 	}
+
+	public int getSize() {
+		return size;
+	}
+
+	public void setSize(int size) {
+		if(size>MAXSIZE) this.size = MAXSIZE;	//auf maximale Größe beschränken
+		else if(size<=0) this.size = 1;			//mindest Größe
+		else this.size = size;
+	}
+	
 	
 }

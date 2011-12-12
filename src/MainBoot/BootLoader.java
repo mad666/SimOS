@@ -5,7 +5,7 @@ import Hardware.*;
 import java.io.*;
 
 public class BootLoader {
-  static int memSize = 100000;
+  static int memSize = 8;
   
   static public class ShutdownException extends Exception{};
   

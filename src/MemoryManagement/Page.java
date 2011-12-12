@@ -9,7 +9,23 @@ public class Page {
 	private boolean rBit;
 	
 	
-	
+	//Konstruktoren
+	public Page(int pageIndex, int pid, boolean pBit, boolean rBit,
+			String[] pageContent) {
+		this.pageIndex = pageIndex;
+		this.pid = pid;
+		this.pBit = pBit;
+		this.rBit = rBit;
+		this.pageContent = pageContent;
+	}
+	public Page(int pageIndex, int pid, boolean pBit, boolean rBit) {
+		this.pageIndex = pageIndex;
+		this.pid = pid;
+		this.pBit = pBit;
+		this.rBit = rBit;
+	}
+
+
 	//Setter & Getter
 	public String getPageContent(int index) {
 		return pageContent[index];
@@ -17,18 +33,24 @@ public class Page {
 	public void setPageContent(String pageContent, int index) {
 		this.pageContent[index] = pageContent;
 	}
-	public boolean ispBit() {
+	public void setPageContent(String[] pageContent) {
+		this.pageContent = pageContent;
+	}
+	
+	public boolean getpBit() {
 		return pBit;
 	}
 	public void setpBit(boolean pBit) {
 		this.pBit = pBit;
 	}
-	public boolean isrBit() {
+	
+	public boolean getrBit() {
 		return rBit;
 	}
 	public void setrBit(boolean rBit) {
 		this.rBit = rBit;
 	}
+	
 	public int getPid() {
 		return pid;
 	}

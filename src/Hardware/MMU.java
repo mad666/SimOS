@@ -8,6 +8,7 @@
 package Hardware;
 
 import MainBoot.SysLogger;
+import MemoryManagement.Page;
 
 public class MMU {
   private MainMemory memory;
@@ -72,5 +73,20 @@ public class MMU {
       SysLogger.writeLog( 1, i + ": " + memory.getContent(i) );
     }
   }
-
+  
+  
+  public void setContent(Page page) {
+	  
+  }
+  public String getContent(String address) {
+	  return getContent(Integer.parseInt(address));
+  }
+  public String getContent(int address) {
+	  return "";
+  }
+  
+  public int replacePage() {
+	  
+	  return 0;
+  }
 }

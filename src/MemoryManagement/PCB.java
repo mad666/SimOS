@@ -14,14 +14,24 @@ public class PCB {
   private int priority;
   private String state;
   private RegisterSet reg;
+  private PageTable pageTable;
 
+  //Konstruktoren
+  public PCB( int pid, int priority, String state, PageTable pageTable ) {
+    this.priority = priority;
+    this.state = state;
+    this.pid =pid;
+    reg = new RegisterSet();
+    this.pageTable = pageTable;
+  }
   public PCB( int pid, int priority, String state ) {
     this.priority = priority;
     this.state = state;
     this.pid =pid;
     reg = new RegisterSet();
   }
-
+  
+  //Setter & Getter
   public int getPriority(){
     return this.priority;
   }
@@ -46,7 +56,15 @@ public class PCB {
   public RegisterSet getRegisterSet(){
   return reg;
   }
- 
+  
+  public PageTable getPageTable() {
+	return pageTable;
+  }
+  public void setPageTable(PageTable pageTable) {
+	this.pageTable = pageTable;
+  }
+  
+  //toString
   public String toString(){
     return "[pid " + pid + " priority " + priority + " base " + reg.getBase() + " limit " + reg.getLimit() + "]";
   }

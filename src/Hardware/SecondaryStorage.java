@@ -18,4 +18,23 @@ public class SecondaryStorage {
 		}
 		return -1;	//nicht gefunden
 	}
+	
+	//SeitenArray an Index i entfernen
+	public void deleteElement(int index) {
+		storage.remove(index);
+	}
+	
+	//SeitenArray zu einem Prozess löschen
+	public void deleteElementProc(int pid) {
+		deleteElement(searchElement(pid));
+	}
+	
+	//Getter & Setter
+	public Page[] getStorage(int index) {
+		return storage.get(index);
+	}
+	//SeitenArray an bestimmten Index einfügen
+	public void setStorage(Page[] pages, int index) {
+		storage.add(index, pages);
+	}
 }
