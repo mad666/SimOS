@@ -9,6 +9,7 @@ public class Page {
 	private boolean rBit;
 	
 	
+	
 	//Konstruktoren
 	public Page(int pageIndex, int pid, boolean pBit, boolean rBit,
 			String[] pageContent) {
@@ -24,11 +25,28 @@ public class Page {
 		this.pBit = pBit;
 		this.rBit = rBit;
 	}
+	public Page(int pageIndex, int pid, String[] pageContent) {
+		this.pageIndex = pageIndex;
+		this.pid = pid;
+		this.pBit = false;
+		this.rBit = false;
+		this.pageContent = pageContent;
+	}
+	public Page(int pageIndex, int pid) {
+		this.pageIndex = pageIndex;
+		this.pid = pid;
+		this.pBit = false;
+		this.rBit = false;
+	}
 
 
+	
 	//Setter & Getter
 	public String getPageContent(int index) {
 		return pageContent[index];
+	}
+	public String[] getPageContent() {
+		return pageContent;
 	}
 	public void setPageContent(String pageContent, int index) {
 		this.pageContent[index] = pageContent;
