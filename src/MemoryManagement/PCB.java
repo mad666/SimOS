@@ -15,6 +15,7 @@ public class PCB {
   private String state;
   private RegisterSet reg;
   private PageTable pageTable;
+  private int storageIndex;
 
   //Konstruktoren
   public PCB( int pid, int priority, String state, PageTable pageTable ) {
@@ -64,6 +65,13 @@ public class PCB {
 	this.pageTable = pageTable;
   }
   
+  public int getStorageIndex() {
+	return storageIndex;
+  }
+  public void setStorageIndex(int storageIndex) {
+	this.storageIndex = storageIndex;
+  }
+
   //toString
   public String toString(){
     return "[pid " + pid + " priority " + priority + " base " + reg.getBase() + " limit " + reg.getLimit() + "]";
