@@ -68,4 +68,9 @@ public class ProcessManager {
     PCBTable.remove(pid);
   }
   
+  //PCB über pid abfragen
+  public PCB getPCB(int pid) {
+	  return PCBTable.get(pid);
+  }
+  
 }

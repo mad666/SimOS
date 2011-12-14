@@ -2,6 +2,8 @@ package MainBoot;
 import MemoryManagement.*;
 import Scheduler.*;
 import Hardware.*;
+import Hardware.MMU.AccessViolation;
+
 import java.io.*;
 
 public class BootLoader {
@@ -11,20 +13,23 @@ public class BootLoader {
   
   static public class ShutdownException extends Exception{};
   
-  public static void main(String [] args) throws IOException {
+  public static void main(String [] args) throws IOException, AccessViolation {
     SysLogger.openLog();
     /* Die Instanzen fuer die verschiedenen Programmteile werden hier erzeugt
      * und durchgereicht. */
     MainMemory memory = new MainMemory( MEMSIZE );
-    MMU mmu = new MMU( memory ); // Nur die MMU hat Zugriff auf den Hauptspeicher
+    SecondaryStorage secondaryStorage = new SecondaryStorage();
+    MMU mmu = new MMU( memory, secondaryStorage ); // Nur die MMU hat Zugriff auf den Hauptspeicher
     CPU cpu = new CPU( mmu );
-    MemoryManagerIF memoryManager = new MemoryManager( memory );
+    MemoryManagerIF memoryManager = new MemoryManager( memory, secondaryStorage );
     ProcessManager processManager = new ProcessManager( memoryManager );
+    
     SchedulerIF scheduler = new Scheduler( cpu, processManager );
     processManager.setScheduler( scheduler );
     
     cpu.setProcessManager( processManager );
     cpu.setScheduler( scheduler );
+    mmu.setProcessManager(processManager);
     
     int pid = processManager.createProcess("init");
     SysLogger.writeLog( 0, "BootLoader: initial process created, pid: " + pid );

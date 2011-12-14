@@ -2,6 +2,7 @@ package Hardware;
 
 import Scheduler.SchedulerIF;
 import Scheduler.Event;
+import Hardware.MMU.AccessViolation;
 import MemoryManagement.ProcessManager;
 import MainBoot.BootLoader;
 import MainBoot.SysLogger;
@@ -34,7 +35,7 @@ public class CPU extends Thread {
     this.processManager = processManager;
   }
 
-  public void operate() throws BootLoader.ShutdownException {
+  public void operate() throws BootLoader.ShutdownException, AccessViolation {
     while (true) {
       int numInstructions = 9;// + random.nextInt(3);
       if (executeTimeslice(numInstructions) != blocked) {
@@ -65,13 +66,13 @@ public class CPU extends Thread {
     this.regSet.setConsole(regSet.getConsole());
   }
 
-  private int executeTimeslice(int numInstructions) throws BootLoader.ShutdownException {
+  private int executeTimeslice(int numInstructions) throws BootLoader.ShutdownException, AccessViolation {
     for (int i = 0; i < numInstructions; i++) {
       int pc = regSet.getProgramCounter();
       if (pc > -1) { // Unschön, könnte auch die Folge eines Programmierfehlers sein!
         String instruction;
         try {
-          instruction = mmu.getMemoryCell(regSet.getProgramCounter(), processManager.getPCB(scheduler.getRunningPid()));
+          instruction = mmu.getMemoryCell(regSet.getProgramCounter(), scheduler.getRunningPid());
         } catch (MMU.AccessViolation ex) {
           // Beende den laufenden Prozess
           scheduler.endProcess();
@@ -93,7 +94,8 @@ public class CPU extends Thread {
       Event event = io.getNextEvent();
       if (event != null && event.getType() == Event.read) {
         SysLogger.writeLog(0, "CPU.executeTimeslice: interrupt for event " + event.toString());
-        mmu.setAbsoluteAddress(event.getAddress(), event.getContent(), processManager.getPCB(scheduler.getRunningPid()));
+//      mmu.setAbsoluteAddress(event.getAddress(), event.getContent(), processManager.getPCB(scheduler.getRunningPid()));
+        mmu.setMemoryCell(event.getAddress(), event.getContent(), scheduler.getRunningPid());
         scheduler.unblock(event);
       }
     }
@@ -177,9 +179,9 @@ public class CPU extends Thread {
       } else if (cmd[0].equals("store")) {
         try {
           if (cmd[1].startsWith("#")) {
-            mmu.setMemoryCell(cmd[2], cmd[1].substring(1), processManager.getPCB(scheduler.getRunningPid()));
+            mmu.setMemoryCell(cmd[2], cmd[1].substring(1), scheduler.getRunningPid());
           } else {
-            mmu.setMemoryCell(cmd[2], getRegister(cmd[1]), processManager.getPCB(scheduler.getRunningPid()));
+            mmu.setMemoryCell(cmd[2], getRegister(cmd[1]), scheduler.getRunningPid());
           }
         } catch (MMU.AccessViolation ex) {
           io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
@@ -192,7 +194,7 @@ public class CPU extends Thread {
           setRegister(cmd[1], cmd[2].substring(1));
         } else {
           try {
-            setRegister(cmd[1], mmu.getMemoryCell(cmd[2], processManager.getPCB(scheduler.getRunningPid())));
+            setRegister(cmd[1], mmu.getMemoryCell(cmd[2], scheduler.getRunningPid()));
           } catch (MMU.AccessViolation ex) {
             io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
             scheduler.endProcess();
@@ -232,8 +234,8 @@ public class CPU extends Thread {
           // Indirekte Adressierung
           cmd[1] = cmd[1].substring(1, cmd[1].length() - 1);
           try {
-            String indAddress = mmu.getMemoryCell(cmd[1], processManager.getPCB(scheduler.getRunningPid()));
-            address = mmu.getMemoryCell(indAddress, processManager.getPCB(scheduler.getRunningPid()));
+            String indAddress = mmu.getMemoryCell(cmd[1], scheduler.getRunningPid());
+            address = mmu.getMemoryCell(indAddress, scheduler.getRunningPid());
           } catch (MMU.AccessViolation ex) {
             io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
             scheduler.endProcess();
@@ -243,7 +245,7 @@ public class CPU extends Thread {
           try {
             // create_process <address>
             // Die Adresse gibt die Speicherzelle an, in der der Dateiname steht
-            address = mmu.getMemoryCell(cmd[1], processManager.getPCB(scheduler.getRunningPid()));
+            address = mmu.getMemoryCell(cmd[1], scheduler.getRunningPid());
           } catch (MMU.AccessViolation ex) {
             io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
             scheduler.endProcess();
@@ -315,7 +317,7 @@ public class CPU extends Thread {
 
       } else if (cmd[0].equals("write_mem")) {
         try {
-          io.write(regSet.getConsole(), mmu.getMemoryCell(cmd[1], processManager.getPCB(scheduler.getRunningPid())));
+          io.write(regSet.getConsole(), mmu.getMemoryCell(cmd[1], scheduler.getRunningPid()));
         } catch (MMU.AccessViolation ex) {
           io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
           scheduler.endProcess();

@@ -12,6 +12,10 @@ public class PageTable {
 	public PageTable(int size) {
 		setSize(size);
 		table = new int[this.size];
+		//wenn Seite nicht eingelagert, dann -1
+		for (int i = 0; i<this.size;i++) {
+			table[i] = -1;
+		}
 	}
 	
 	
