@@ -17,11 +17,15 @@ import Scheduler.Scheduler;
 
 public class MMU {
 	
-	private MainMemory memory;
-	private RegisterSet regSet;
-	private PageTable pageTable = new PageTable(BootLoader.VIRTMEMSIZE);
+	//Hauptspeicher
+	private MainMemory memory;		
+	//Seitentabelle der MMU mit der maximalen Größe
+	private PageTable pageTable = new PageTable(BootLoader.VIRTMEMSIZE);	
+	//PCB des aktuellen Prozesses
 	private PCB pcb;
+	//Prozess Manager zur Prozessverwaltung
 	private ProcessManager processManager;
+	//Sekundär Speicher zum Auslagern
 	private SecondaryStorage secondaryStorage;
 	
 
@@ -33,15 +37,13 @@ public class MMU {
 	public MMU(MainMemory memory, SecondaryStorage secondaryStorage) {
 		this.memory = memory;
 		this.secondaryStorage = secondaryStorage;
-		this.pcb = new PCB(-2,0,"");	//weil -1 idleProcess
+		//"leere" PCB, pid = -2, weil -1 = idleProcess
+		this.pcb = new PCB(-2,0,"");	
 	}
 	
 	
 	
 	//Getter & Setter
-	public void setRegisterSet(RegisterSet regSet) {
-		this.regSet = regSet;
-	}
 	public void setProcessManager(ProcessManager processManager) {
 		this.processManager = processManager;
 	}
@@ -80,10 +82,14 @@ public class MMU {
 		return getContent(Integer.parseInt(address), pid);
 	}
 	public String getContent(int address, int pid) {
+		//Index aus Adresse holen
 		String index=Integer.toString(address).substring(0, 3);
-		String offset=Integer.toString(address).substring(4, 7);
 		int ind = Integer.parseInt(index);
+		
+		//Offset aus Adresse holen
+		String offset=Integer.toString(address).substring(4, 7);
 		int off = Integer.parseInt(offset);
+		
 		//wenn seite nicht eingelagert
 		if(inMemory(ind));
 		
@@ -122,7 +128,9 @@ public class MMU {
 	public boolean checkProcess(int pid) {
 		//nur für den ersten durchlauf
 		if(this.pcb.getPid()==-2) {
+			//PCB auf neuen Prozesses ändern
 			this.pcb = processManager.getPCB(pid);
+			//Seitentabelle des neuen Prozess laden
 			this.pageTable = pcb.getPageTable();
 			return true;
 		}
@@ -133,17 +141,31 @@ public class MMU {
 		//neuer Prozess
 		//Seitentabelle des alten sichern
 		else {
+			//alte Seitentabelle sichern
 			this.pcb.setPageTable(this.pageTable);
+			//PCB auf neuen Prozesses ändern
 			this.pcb = processManager.getPCB(pid);
+			//Seitentabelle des neuen Prozess laden
 			this.pageTable = pcb.getPageTable();
 			return true;
 		}
 	}
 	
-	//prüfen ob Seite eingelagert
+	//prüfen ob Seite im Hauptspeicher eingelagert
 	public boolean inMemory(int index) {
 		if(pcb.getPageTable().getFrameID(index)==-1) return false;
 		else return true;
+	}
+	
+	//leeren Frame suchen, wenn keiner frei, gebe -1 zurück
+	public int searchFreeFrame() {
+		//alle Seiten im Hauptspeicher durchlaufen
+		for(int index = 0; index < BootLoader.MEMSIZE;index++) {
+			//wenn leerer Rahmen vorhanden, gebe seinen Index zurück
+			if(memory.getFrame(index).getFrameContent() == null) return index;
+		}
+		//kein leerer Rahmen
+		return -1;
 	}
 	
 	//Seite ersetzen
@@ -152,9 +174,11 @@ public class MMU {
 		return 0;
 	}
 	
-	//Alle rBits auf 0 setzen
+	//Alle rBits auf "false" setzen
 	public void resetRBits() {
+		//alle Seiten im Hauptspeicher durchlaufen
 		for(int index = 0; index < BootLoader.MEMSIZE;index++) {
+			//rBit auf "false" setzen
 			memory.getFrame(index).getFrameContent().setrBit(false);
 		}
 		

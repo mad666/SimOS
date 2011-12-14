@@ -23,7 +23,6 @@ public class CPU extends Thread {
   public CPU(MMU mmu) {
     this.mmu = mmu;
     regSet = new RegisterSet();
-    mmu.setRegisterSet(regSet);
     io = new IO();
   }
 
