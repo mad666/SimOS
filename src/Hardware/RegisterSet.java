@@ -6,8 +6,6 @@ public class RegisterSet {
     private int programCounter;
     private String register1;
     private String register2;
-    private int base;
-    private int limit;
     private SysConsole console;
     private ArrayList<String> stack;
     
@@ -39,22 +37,6 @@ public class RegisterSet {
     public void setRegister2(String value) {
         register2 = value;
     }    
-    
-    public int getBase() {
-        return base;
-    }
-
-    public void setBase(int address) {
-        base = address;
-    }
-    
-    public int getLimit() {
-        return limit;
-    }
-    
-    public void setLimit(int address) {
-        limit = address;
-    }
     
     public SysConsole getConsole() {
       return console;
