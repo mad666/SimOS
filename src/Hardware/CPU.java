@@ -71,7 +71,7 @@ public class CPU extends Thread {
       if (pc > -1) { // Unschön, könnte auch die Folge eines Programmierfehlers sein!
         String instruction;
         try {
-          instruction = mmu.getMemoryCell(regSet.getProgramCounter());
+          instruction = mmu.getMemoryCell(regSet.getProgramCounter(), processManager.getPCB(scheduler.getRunningPid()));
         } catch (MMU.AccessViolation ex) {
           // Beende den laufenden Prozess
           scheduler.endProcess();
@@ -93,7 +93,7 @@ public class CPU extends Thread {
       Event event = io.getNextEvent();
       if (event != null && event.getType() == Event.read) {
         SysLogger.writeLog(0, "CPU.executeTimeslice: interrupt for event " + event.toString());
-        mmu.setAbsoluteAddress(event.getAddress(), event.getContent());
+        mmu.setAbsoluteAddress(event.getAddress(), event.getContent(), processManager.getPCB(scheduler.getRunningPid()));
         scheduler.unblock(event);
       }
     }
@@ -177,9 +177,9 @@ public class CPU extends Thread {
       } else if (cmd[0].equals("store")) {
         try {
           if (cmd[1].startsWith("#")) {
-            mmu.setMemoryCell(cmd[2], cmd[1].substring(1));
+            mmu.setMemoryCell(cmd[2], cmd[1].substring(1), processManager.getPCB(scheduler.getRunningPid()));
           } else {
-            mmu.setMemoryCell(cmd[2], getRegister(cmd[1]));
+            mmu.setMemoryCell(cmd[2], getRegister(cmd[1]), processManager.getPCB(scheduler.getRunningPid()));
           }
         } catch (MMU.AccessViolation ex) {
           io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
@@ -192,7 +192,7 @@ public class CPU extends Thread {
           setRegister(cmd[1], cmd[2].substring(1));
         } else {
           try {
-            setRegister(cmd[1], mmu.getMemoryCell(cmd[2]));
+            setRegister(cmd[1], mmu.getMemoryCell(cmd[2], processManager.getPCB(scheduler.getRunningPid())));
           } catch (MMU.AccessViolation ex) {
             io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
             scheduler.endProcess();
@@ -232,8 +232,8 @@ public class CPU extends Thread {
           // Indirekte Adressierung
           cmd[1] = cmd[1].substring(1, cmd[1].length() - 1);
           try {
-            String indAddress = mmu.getMemoryCell(cmd[1]);
-            address = mmu.getMemoryCell(indAddress);
+            String indAddress = mmu.getMemoryCell(cmd[1], processManager.getPCB(scheduler.getRunningPid()));
+            address = mmu.getMemoryCell(indAddress, processManager.getPCB(scheduler.getRunningPid()));
           } catch (MMU.AccessViolation ex) {
             io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
             scheduler.endProcess();
@@ -243,7 +243,7 @@ public class CPU extends Thread {
           try {
             // create_process <address>
             // Die Adresse gibt die Speicherzelle an, in der der Dateiname steht
-            address = mmu.getMemoryCell(cmd[1]);
+            address = mmu.getMemoryCell(cmd[1], processManager.getPCB(scheduler.getRunningPid()));
           } catch (MMU.AccessViolation ex) {
             io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
             scheduler.endProcess();
@@ -315,7 +315,7 @@ public class CPU extends Thread {
 
       } else if (cmd[0].equals("write_mem")) {
         try {
-          io.write(regSet.getConsole(), mmu.getMemoryCell(cmd[1]));
+          io.write(regSet.getConsole(), mmu.getMemoryCell(cmd[1], processManager.getPCB(scheduler.getRunningPid())));
         } catch (MMU.AccessViolation ex) {
           io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
           scheduler.endProcess();
@@ -341,5 +341,22 @@ public class CPU extends Thread {
     }
     return blocked + 1;
   }
+  
+  public void startTimer() {
+	  new Thread() {
+		  public void run() {
+			while(true) {
+				try {
+					sleep(100);		//tempor�rer Testwert
+					mmu.resetRBits();
+				} catch (InterruptedException e) {
+					//gibt kein Fehler
+				}
+			}
+			  
+		  }
+	  }.start();
+  }
 }
+
 
