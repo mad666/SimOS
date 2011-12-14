@@ -6,11 +6,15 @@ public class PageTable {
 	private int size;
 	private int[] table;
 
+	
+	
 	//Konstruktoren
 	public PageTable(int size) {
 		setSize(size);
 		table = new int[this.size];
 	}
+	
+	
 	
 	//Getter & Setter
 	public int getFrameID(int pageIndex) {
@@ -30,4 +34,6 @@ public class PageTable {
 	}
 	
 	
+	
+	//Funktionen
 }

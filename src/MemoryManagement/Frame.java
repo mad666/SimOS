@@ -4,6 +4,9 @@ public class Frame {
 	private int frameID;
 	private Page frameContent;
 	
+	
+	
+	//Konstruktoren
 	public Frame(int frameID) {
 		this.frameID = frameID;
 		this.frameContent = null;
@@ -13,6 +16,8 @@ public class Frame {
 		this.frameID = frameID;
 		this.frameContent = frameContent.clone();
 	}
+	
+	
 	
 	//Setter & Getter
 	public Page getFrameContent() {
@@ -25,4 +30,7 @@ public class Frame {
 		return frameID;
 	}
 	
+	
+	
+	//Funktionen
 }

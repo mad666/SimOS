@@ -10,6 +10,7 @@ public class Page implements Cloneable{
 	private boolean rBit;
 	
 	
+	
 	//Konstruktoren
 	public Page(int pageIndex, int pid, boolean pBit, boolean rBit,
 			String[] pageContent) {
@@ -75,6 +76,7 @@ public class Page implements Cloneable{
 	
 	
 	
+	//Funktionen
 	// gibt Kopie des Eingabeobjekts zurück
 	public Page clone() {
 		return new Page(this.pageIndex, this.pid, this.pBit, this.rBit, this.pageContent);
