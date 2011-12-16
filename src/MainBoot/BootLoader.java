@@ -1,47 +1,59 @@
 package MainBoot;
+
 import MemoryManagement.*;
 import Scheduler.*;
 import Hardware.*;
-import Hardware.MMU.AccessViolation;
 
 import java.io.*;
 
 public class BootLoader {
-  public final static int MEMSIZE = 8;
-  public final static int PAGESIZE = 4;
-  public final static int VIRTMEMSIZE = 32;
-  
-  static public class ShutdownException extends Exception{};
-  
-  public static void main(String [] args) throws IOException, AccessViolation {
-    SysLogger.openLog();
-    /* Die Instanzen fuer die verschiedenen Programmteile werden hier erzeugt
-     * und durchgereicht. */
-    MainMemory memory = new MainMemory( MEMSIZE );
-    SecondaryStorage secondaryStorage = new SecondaryStorage();
-    MMU mmu = new MMU( memory, secondaryStorage ); // Nur die MMU hat Zugriff auf den Hauptspeicher
-    CPU cpu = new CPU( mmu );
-    MemoryManagerIF memoryManager = new MemoryManager( memory, secondaryStorage );
-    ProcessManager processManager = new ProcessManager( memoryManager );
-    
-    SchedulerIF scheduler = new Scheduler( cpu, processManager );
-    processManager.setScheduler( scheduler );
-    
-    cpu.setProcessManager( processManager );
-    cpu.setScheduler( scheduler );
-    mmu.setProcessManager(processManager);
-    
-    int pid = processManager.createProcess("init");
-    SysLogger.writeLog( 0, "BootLoader: initial process created, pid: " + pid );
+	// Konstanten für Speicherverwaltung
+	public final static int FRAMECOUNT = 8;
+	public final static int PAGESIZE = 4;
+	public final static int VIRTMEMSIZE = 32;
 
-    SysLogger.writeLog( 0, "BootLoader: starting the cpu" );
-    try {
-      cpu.startTimer();
-      cpu.operate();
-    } catch( ShutdownException x ) {
-      SysLogger.writeLog( 0, "BootLoader: shutting down" );
-      processManager.destroyProcess(pid);
-      SysLogger.closeLog();
-    }
-  }
+	static public class ShutdownException extends Exception {
+	};
+
+	public static void main(String[] args) throws IOException {
+		// Logdatei öffnen
+		SysLogger.openLog();
+
+		// Hardware Initialisierung
+		MainMemory memory = new MainMemory(FRAMECOUNT * PAGESIZE);
+		SecondaryStorage secondaryStorage = new SecondaryStorage();
+		MMU mmu = new MMU();
+		CPU cpu = new CPU(mmu);
+
+		// Software Initialisierung
+		MemoryManagerIF memoryManager = new MemoryManager(memory,
+				secondaryStorage);
+		ProcessManager processManager = new ProcessManager(memoryManager);
+		SchedulerIF scheduler = new Scheduler(cpu, processManager);
+
+		// Übergabe Scheduler an Prozessmanager
+		processManager.setScheduler(scheduler);
+
+		// Übergabe der Software an die Hardware
+		cpu.setProcessManager(processManager);
+		cpu.setScheduler(scheduler);
+		cpu.setMemoryManager((MemoryManager) memoryManager);
+		mmu.setMemoryManager((MemoryManager) memoryManager);
+
+		// Erzeugen des Init Prozess
+		int pid = processManager.createProcess("init");
+		SysLogger.writeLog(0, "BootLoader: initial process created, pid: "
+				+ pid);
+
+		// Starten der CPU
+		SysLogger.writeLog(0, "BootLoader: starting the cpu");
+		try {
+			cpu.startTimer();
+			cpu.operate();
+		} catch (ShutdownException x) {
+			SysLogger.writeLog(0, "BootLoader: shutting down");
+			processManager.destroyProcess(pid);
+			SysLogger.closeLog();
+		}
+	}
 }

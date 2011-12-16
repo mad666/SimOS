@@ -9,7 +9,6 @@ package MemoryManagement;
 
 import Hardware.MainMemory;
 import Hardware.SecondaryStorage;
-import MainBoot.BootLoader;
 import MainBoot.SysLogger;
 import java.io.*;
 
@@ -17,11 +16,27 @@ public class MemoryManager implements MemoryManagerIF {
 
 	private MainMemory memory;
 	private SecondaryStorage secondaryStorage;
+	private ProcessManager processManager;
+	private InvPTEntry[] invPageTable;
+	
 
 	/** Creates a new instance of MemoryManager */
 	public MemoryManager(MainMemory memory, SecondaryStorage secondaryStorage) {
 		this.memory = memory;
 		this.secondaryStorage = secondaryStorage;
+	}
+
+	public void setProcessManager(ProcessManager processmanager) {
+		this.processManager = processmanager;
+	}
+	
+	public void setContent(int address, String line) {
+
+	}
+
+	public String getContent(int address) {
+		String line = null;
+		return line;
 	}
 
 	public int loadProgram(String file, PCB pcb) {
@@ -30,41 +45,25 @@ public class MemoryManager implements MemoryManagerIF {
 			String line = input.readLine();
 			int size = 0;
 			if (line != null) {
-				// In der ersten Zeile steht der benÃ¶tigte Speicherplatz.
-				size = (Integer.valueOf(line)) / BootLoader.PAGESIZE;
+				// In der ersten Zeile steht der benötigte Speicherplatz.
+				size = Integer.valueOf(line);
 				SysLogger.writeLog(0, "MemoryManager.loadProgram: " + file
 						+ " with size " + size);
 
-				PageTable pageTable = new PageTable(size);
-				Page[] pages = new Page[size];
-				for(int i = 0; i < size; i++) {
-					pages[i] = new Page(i, pcb.getPid());
-				}
-				pcb.setPageTable(pageTable);
 				pcb.getRegisterSet().setProgramCounter(0);
 
-				int pageIndex = 0;
-				int pageOff = 0;
-
+				int n = 0;
 				line = input.readLine();
-				pageOff++;
 				while (line != null) {
-					if (pageOff > 0)
-						pages[pageIndex].setPageContent(line, 0);
-					while (pageOff < BootLoader.PAGESIZE) {
-						line = input.readLine();
-						pages[pageIndex].setPageContent(line, pageOff);
-						pageOff++;
-					}
-					
-					pageOff = 0;
-					pageIndex++;
+					// Debug:
+					// line = input.readLine();
+					memory.setContent(n, line);
+					n++;
+					line = input.readLine();
 				}
-				memory.setContent(pages[0]);
-				secondaryStorage.addElement(pages);
 			}
 			input.close();
-			
+
 		} catch (IOException e) {
 			System.err.println(e.toString());
 			System.exit(1);
@@ -73,4 +72,12 @@ public class MemoryManager implements MemoryManagerIF {
 		return 0;
 	}
 
+	public void resetRBits() {
+
+	}
+
+	public int replacePage() {
+		int index = 0;
+		return index;
+	}
 }
