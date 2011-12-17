@@ -20,7 +20,7 @@ public class ProcessManager {
 	Hashtable<Integer, PCB> PCBTable = new Hashtable<Integer, PCB>();
 	int pidCounter = 0;
 
-	public static final int INITPID = 1;
+	static final int INITPID = 1;
 
 	/** Creates a new instance of ProcessManagment */
 	public ProcessManager(MemoryManagerIF memoryManager) {

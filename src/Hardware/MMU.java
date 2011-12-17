@@ -7,9 +7,11 @@
 
 package Hardware;
 
+import MainBoot.BootLoader;
 import MainBoot.SysLogger;
 import MemoryManagement.MemoryManager;
 import MemoryManagement.PCB;
+import MemoryManagement.PTEntry;
 
 public class MMU {
 	private MemoryManager memoryManager;
@@ -42,9 +44,15 @@ public class MMU {
 					+ address);
 			throw new AccessViolation();
 		}
-		int realAddress = address + regSet.getBase();
-
-		memoryManager.setContent(realAddress, value);
+		int index = address / BootLoader.PAGESIZE;
+		int offset = address % BootLoader.PAGESIZE;
+		if(inMemory(pcb.getPageTable(), index)) {
+			memoryManager.setContent(index, offset, value, pcb.getPid());
+		}
+		else { 
+			memoryManager.replacePage(index, pcb.getPid());
+			memoryManager.setContent(index, offset, value, pcb.getPid());
+		}
 	}
 
 	public String getMemoryCell(String address, PCB pcb) throws AccessViolation {
@@ -57,14 +65,28 @@ public class MMU {
 					+ address);
 			throw new AccessViolation();
 		}
-		int realAddress = address + regSet.getBase();
-		return memoryManager.getContent(realAddress);
+		int index = address / BootLoader.PAGESIZE;
+		int offset = address % BootLoader.PAGESIZE;
+		if(inMemory(pcb.getPageTable(), index)) {
+			return memoryManager.getContent(index, offset, pcb.getPid());
+		}
+		else { 
+			memoryManager.replacePage(index, pcb.getPid() );
+			return memoryManager.getContent(index, offset, pcb.getPid());
+		}
 	}
 
-	public void setAbsoluteAddress(int address, String value, PCB pcb) {
-		memoryManager.setContent(address, value);
+	public void setAbsoluteAddress(int address, String value, PCB pcb)  {
+		try {
+			setMemoryCell(address,value,pcb);
+		} catch (AccessViolation e) {
+			e.printStackTrace();
+		}
 	}
 
+	
+	// diese beiden Methoden werden in der CPU benötigt, lösen die Adresse aber nicht wirklich auf
+	// sondern geben nur den eingabewert zurück
 	public int resolveAddress(String address) throws AccessViolation {
 		return resolveAddress(Integer.parseInt(address));
 	}
@@ -75,11 +97,13 @@ public class MMU {
 					+ address);
 			throw new AccessViolation();
 		}
-		return address + regSet.getBase();
+		return address;
 	}
 
-	public boolean inMemory(int index) {
-		return true;
+	public boolean inMemory(PTEntry[] pagetable,int index) {
+			return pagetable[index].getpBit();
+
+
 	}
 	// public void dumpMemory( int limit ) {
 	// SysLogger.writeLog( 1, "MMU.dumpMemory" );

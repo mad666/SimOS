@@ -3,15 +3,17 @@ package MemoryManagement;
 import MainBoot.BootLoader;
 
 public class PTEntry{
-	private boolean pBit;
-	private boolean rBit;
-	private boolean mBit;
+	protected boolean pBit;
+	protected boolean rBit;
+	protected boolean mBit;
+	protected int address;
 	
 	//Konstruktor
 	public PTEntry() {
 		this.pBit = false;
 		this.rBit = false;
 		this.mBit = false;
+		this.address = -1;
 	}
 
 	//Setter & Getter
@@ -35,5 +37,13 @@ public class PTEntry{
 
 	public void setmBit(boolean mBit) {
 		this.mBit = mBit;
+	}
+	
+	public int getAddress() {
+		return this.address;
+	}
+	
+	public void setAddress(int address) {
+		this.address = address;
 	}
 }

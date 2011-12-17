@@ -30,8 +30,9 @@ public class SecondaryStorage {
 	}
 
 	// Element an Array anhängen
-	public void addElement(String[] lines) {
+	public int addElement(String[] lines) {
 		storage.add(lines);
+		return storage.size()-1;
 	}
 
 	// StringArray an Index i entfernen

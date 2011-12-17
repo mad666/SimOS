@@ -33,12 +33,16 @@ public class BootLoader {
 
 		// Übergabe Scheduler an Prozessmanager
 		processManager.setScheduler(scheduler);
+		
+		// Übergabe Prozessmanager an den Memory Manager
+		((MemoryManager) memoryManager).setProcessManager(processManager);
 
 		// Übergabe der Software an die Hardware
 		cpu.setProcessManager(processManager);
 		cpu.setScheduler(scheduler);
 		cpu.setMemoryManager((MemoryManager) memoryManager);
 		mmu.setMemoryManager((MemoryManager) memoryManager);
+		
 
 		// Erzeugen des Init Prozess
 		int pid = processManager.createProcess("init");

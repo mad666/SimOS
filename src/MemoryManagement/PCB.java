@@ -19,14 +19,6 @@ public class PCB {
 	private int storageIndex;
 
 	// Konstruktoren
-	
-	public PCB(int pid, int priority, String state, PTEntry[] pageTable) {
-		this.priority = priority;
-		this.state = state;
-		this.pid = pid;
-		reg = new RegisterSet();
-		this.pageTable = pageTable;
-	}
 
 	public PCB(int pid, int priority, String state) {
 		this.priority = priority;
@@ -71,14 +63,13 @@ public class PCB {
 	public void setPageTable(PTEntry[] pageTable) {
 		this.pageTable = pageTable;
 	}
-	
+
 	public void setPageTableEntry(PTEntry ptEntry, int index) {
-		
+		pageTable[index] = ptEntry;
 	}
-	
+
 	public PTEntry getPagteTableEntry(int index) {
-		PTEntry ptentry = null;
-		return ptentry;
+		return pageTable[index];
 	}
 
 	public int getStorageIndex() {

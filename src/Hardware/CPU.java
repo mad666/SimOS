@@ -39,7 +39,6 @@ public class CPU extends Thread {
 
 	public void setMemoryManager(MemoryManager memoryManager) {
 		this.memoryManager = memoryManager;
-		memoryManager.setProcessManager(this.processManager);
 	}
 
 	public void operate() throws BootLoader.ShutdownException {
@@ -114,7 +113,7 @@ public class CPU extends Thread {
 						"CPU.executeTimeslice: interrupt for event "
 								+ event.toString());
 				mmu.setAbsoluteAddress(event.getAddress(), event.getContent(),
-						processManager.getPCB(ProcessManager.INITPID));
+						processManager.getPCB(scheduler.getRunningPid()));
 				scheduler.unblock(event);
 			}
 		}
