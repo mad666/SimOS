@@ -3,12 +3,12 @@ package Hardware;
 import java.util.ArrayList;
 
 public class SecondaryStorage {
-
+	// Attribute
 	ArrayList<String[]> storage;
 
 	// Konstruktoren
-	
-	  /** Creates a new instance of SecondaryStorage */
+
+	/** Creates a new instance of SecondaryStorage */
 	public SecondaryStorage() {
 		this.storage = new ArrayList<String[]>();
 	}
@@ -32,15 +32,15 @@ public class SecondaryStorage {
 	// Element an Array anhängen
 	public int addElement(String[] lines) {
 		storage.add(lines);
-		return storage.size()-1;
+		return storage.size() - 1;
 	}
 
-	// StringArray an Index i entfernen
+	// Element an bestimmtem Index entfernen
 	public void deleteElement(int index) {
 		storage.remove(index);
 	}
 
-	// einzelne Seite aktualisieren über index
+	// einzelne Seite an über Index aktualisieren
 	public void changeLine(int listIndex, int arrayIndex, String line) {
 		getStorage(listIndex)[arrayIndex] = line;
 	}

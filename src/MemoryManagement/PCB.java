@@ -1,16 +1,9 @@
-/*
- * PCB.java
- *
- * Created on September 1, 2007, 12:28 PM
- *
- */
-
 package MemoryManagement;
 
 import Hardware.RegisterSet;
 
 public class PCB {
-
+	// Attribute
 	private int pid;
 	private int priority;
 	private String state;
@@ -18,8 +11,7 @@ public class PCB {
 	private PTEntry[] pageTable;
 	private int storageIndex;
 
-	// Konstruktoren
-
+	// Konstruktor
 	public PCB(int pid, int priority, String state) {
 		this.priority = priority;
 		this.state = state;
@@ -64,20 +56,24 @@ public class PCB {
 		this.pageTable = pageTable;
 	}
 
-	public void setPageTableEntry(PTEntry ptEntry, int index) {
-		pageTable[index] = ptEntry;
-	}
-
-	public PTEntry getPagteTableEntry(int index) {
-		return pageTable[index];
-	}
-
 	public int getStorageIndex() {
 		return storageIndex;
 	}
 
 	public void setStorageIndex(int storageIndex) {
 		this.storageIndex = storageIndex;
+	}
+
+	// Funktionen
+
+	// einzelenen Eintrag der Seintentabelle ändern
+	public void setPageTableEntry(PTEntry ptEntry, int index) {
+		pageTable[index] = ptEntry;
+	}
+
+	// einzelnen Eintrag der Seitentabelle lesen
+	public PTEntry getPagteTableEntry(int index) {
+		return pageTable[index];
 	}
 
 	// toString

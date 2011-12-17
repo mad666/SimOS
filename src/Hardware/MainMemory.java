@@ -1,10 +1,3 @@
-/*
- * SimpleMainMemory.java
- *
- * Created on September 1, 2007, 12:28 PM
- *
- */
-
 package Hardware;
 
 import java.util.ArrayList;
