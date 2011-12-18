@@ -101,11 +101,11 @@ public class MMU {
 	}
 
 	public int resolveAddress(int address) throws AccessViolation {
-		if (address < 0 || address > regSet.getLimit()) {
-			SysLogger.writeLog(0, "MMU.resolveAddress: access violation: "
-					+ address);
-			throw new AccessViolation();
-		}
+//		if (address < 0 || address > regSet.getLimit()) {
+//			SysLogger.writeLog(0, "MMU.resolveAddress: access violation: "
+//					+ address);
+//			throw new AccessViolation();
+//		}
 		return address;
 	}
 

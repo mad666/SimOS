@@ -36,13 +36,12 @@ public class MemoryManager implements MemoryManagerIF {
 	// den übergeben Wert in den Speicher
 	public void setContent(int index, int offset, String line, int pid) {
 		processManager.getPCB(pid).getPageTableEntry(index).setrBit(true);
-		invPageTable[processManager.getPCB(pid).getPageTableEntry(index)
-				.getAddress()].setrBit(true);
-		memory.setContent(((processManager.getPCB(pid).getPageTableEntry(index)
-				.getAddress() * BootLoader.PAGESIZE) + offset), line);
+		invPageTable[processManager.getPCB(pid).getPageTableEntry(index)				.getAddress()].setrBit(true);
+		secondaryStorage.changeLine(processManager.getPCB(pid).getStorageIndex(), (index*BootLoader.PAGESIZE)+offset, line);
+		memory.setContent(((processManager.getPCB(pid).getPageTableEntry(index)				.getAddress() * BootLoader.PAGESIZE) + offset), line);
+		
 		processManager.getPCB(pid).getPageTableEntry(index).setmBit(true);
-		invPageTable[processManager.getPCB(pid).getPageTableEntry(index)
-				.getAddress()].setmBit(true);
+		invPageTable[processManager.getPCB(pid).getPageTableEntry(index)				.getAddress()].setmBit(true);
 
 	}
 
@@ -141,9 +140,7 @@ public class MemoryManager implements MemoryManagerIF {
 			if (invPageTable[frame].getPid() == -2) {
 				// alle Zeilen der neuen Seite Seite einlagern
 				for (int line = 0; line < BootLoader.PAGESIZE; line++) {
-					memory.setContent(
-							line,
-							secondaryStorage.getStorage(processManager.getPCB(pid).getStorageIndex())[(index * BootLoader.PAGESIZE)+ line]);
+					memory.setContent((index * BootLoader.PAGESIZE)+ line,	secondaryStorage.getStorage(processManager.getPCB(pid).getStorageIndex())[(index * BootLoader.PAGESIZE)+ line]);
 				} // end For
 				
 				// Bits in neuer Seitentabelle und invertierter Seitentabelle setzen
