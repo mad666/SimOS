@@ -113,7 +113,6 @@ public class MMU {
 	// im Hauptspeicher eingelagert ist
 	public boolean inMemory(PTEntry[] pagetable, int index) {
 		return pagetable[index].getpBit();
-
 	}
 
 	// Alte Methode, wurde nicht genutzt, möglichweise für Debugging gedaccht

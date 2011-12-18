@@ -72,7 +72,7 @@ public class PCB {
 	}
 
 	// einzelnen Eintrag der Seitentabelle lesen
-	public PTEntry getPagteTableEntry(int index) {
+	public PTEntry getPageTableEntry(int index) {
 		return pageTable[index];
 	}
 

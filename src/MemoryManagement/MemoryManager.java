@@ -35,21 +35,27 @@ public class MemoryManager implements MemoryManagerIF {
 	// wird nur aufgerufen, wenn die Seite bereits eingelagert ist und schreibt
 	// den übergeben Wert in den Speicher
 	public void setContent(int index, int offset, String line, int pid) {
-		processManager.getPCB(pid).getPageTable()[index].setrBit(true);
-		memory.setContent(
-				processManager.getPCB(pid).getPageTable()[index].getAddress()
-						+ offset, line);
-		processManager.getPCB(pid).getPageTable()[index].setmBit(true);
+		processManager.getPCB(pid).getPageTableEntry(index).setrBit(true);
+		invPageTable[processManager.getPCB(pid).getPageTableEntry(index)
+				.getAddress()].setrBit(true);
+		memory.setContent(((processManager.getPCB(pid).getPageTableEntry(index)
+				.getAddress() * BootLoader.PAGESIZE) + offset), line);
+		processManager.getPCB(pid).getPageTableEntry(index).setmBit(true);
+		invPageTable[processManager.getPCB(pid).getPageTableEntry(index)
+				.getAddress()].setmBit(true);
+
 	}
 
 	// eine Zeile aus dem Speicher lesen
 	// wird nur aufgerufen, wenn die Seite bereits eingelagert ist und gibt die
 	// Zeile aus der angegebenen Adresse zurück
 	public String getContent(int index, int offset, int pid) {
-		processManager.getPCB(pid).getPageTable()[index].setrBit(true);
-		return memory
-				.getContent(processManager.getPCB(pid).getPageTable()[index]
-						.getAddress() + offset);
+		processManager.getPCB(pid).getPageTableEntry(index).setrBit(true);
+		invPageTable[processManager.getPCB(pid).getPageTableEntry(index)
+				.getAddress()].setrBit(true);
+		return memory.getContent((processManager.getPCB(pid)
+				.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE)
+				+ offset);
 	}
 
 	// Programm bei Prozesserstellung laden
@@ -84,7 +90,7 @@ public class MemoryManager implements MemoryManagerIF {
 					count++;
 					line = input.readLine();
 				}
-				// virtuelle Speicher auslagern
+				// virtuellen Speicher auslagern
 				pcb.setStorageIndex(secondaryStorage.addElement(lines));
 
 				// Seitentabelle erstellen
@@ -114,13 +120,13 @@ public class MemoryManager implements MemoryManagerIF {
 		for (int frame = 0; frame < BootLoader.FRAMECOUNT; frame++) {
 			invPageTable[frame].setrBit(false);
 			processManager.getPCB(invPageTable[frame].getPid())
-					.getPagteTableEntry(invPageTable[frame].getPageIndex())
+					.getPageTableEntry(invPageTable[frame].getPageIndex())
 					.setrBit(false);
 		}
 	}
 
 	// Seitenersetzung
-	
+
 	// zu verdrängende Seite wird mit Clock Algotithmus ermittelt
 	// Nummer der neu einzulagernde Seite wird übergeben
 	public void replacePage(int index, int pid) {
@@ -129,21 +135,23 @@ public class MemoryManager implements MemoryManagerIF {
 
 		// prüfen, ob ein Frame noch ungenutzt ist und ggf. Seite dort einlagern
 		for (int frame = 0; frame < BootLoader.FRAMECOUNT && found != true; frame++) {
-			// pid 0 -2 zeigt freien Frame an
+			// pid = -2 zeigt ungenutzen Frame an
 			if (invPageTable[frame].getPid() == -2) {
-				// alle Zeilen einer Seite einlagern und Bits setzen
+				// alle Zeilen der neuen Seite Seite einlagern
 				for (int line = 0; line < BootLoader.PAGESIZE; line++) {
 					memory.setContent(
 							line,
 							secondaryStorage.getStorage(processManager.getPCB(
 									pid).getStorageIndex())[(index * BootLoader.PAGESIZE)
 									+ line]);
-				} //end For
-				processManager.getPCB(pid).getPagteTableEntry(index)
+				} // end For
+				
+				// Bits in neuer Seitentabelle und invertierter Seitentabelle setzen
+				processManager.getPCB(pid).getPageTableEntry(index)
 						.setpBit(true);
-				processManager.getPCB(pid).getPagteTableEntry(index)
+				processManager.getPCB(pid).getPageTableEntry(index)
 						.setrBit(true);
-				processManager.getPCB(pid).getPagteTableEntry(index)
+				processManager.getPCB(pid).getPageTableEntry(index)
 						.setAddress(frame);
 				invPageTable[frame].setpBit(true);
 				invPageTable[frame].setrBit(true);
@@ -151,10 +159,9 @@ public class MemoryManager implements MemoryManagerIF {
 				invPageTable[frame].setPid(pid);
 				invPageTable[frame].setPageIndex(index);
 				found = true;
-			} //end If
-		} //end For
+			} // end If
+		} // end For
 
-		
 		// falls keine freier Frame gefunden wurde, nun Clock ausführen
 		for (int frame = 0; frame < BootLoader.FRAMECOUNT && found != true; frame++) {
 
@@ -170,54 +177,57 @@ public class MemoryManager implements MemoryManagerIF {
 								.getPageIndex() * BootLoader.PAGESIZE) + line),
 								memory.getContent(frame + line));
 
-					}
+					} // end For
 
-					// da alte Seite nun nicht mehr eingelagert ist, Bits in der
-					// Seitenatbelle zurücksetzen
+					// da die alte Seite nun nicht mehr eingelagert ist, Bits in der alten
+					// Seitenatbelle setzen
 					processManager
 							.getPCB(invPageTable[frame].getPid())
-							.getPagteTableEntry(
+							.getPageTableEntry(
 									invPageTable[frame].getPageIndex())
 							.setAddress(-1);
 					processManager
 							.getPCB(invPageTable[frame].getPid())
-							.getPagteTableEntry(
+							.getPageTableEntry(
 									invPageTable[frame].getPageIndex())
 							.setmBit(false);
 					processManager
 							.getPCB(invPageTable[frame].getPid())
-							.getPagteTableEntry(
+							.getPageTableEntry(
 									invPageTable[frame].getPageIndex())
 							.setpBit(false);
-				}
+				} // end If
 
 				// falls Seite nicht gesichert werden muss, nur Bits in der
-				// Seitenatbelle zurücksetzen
+				// alten Seitenatbelle setzen
 				else {
 					processManager
 							.getPCB(invPageTable[frame].getPid())
-							.getPagteTableEntry(
+							.getPageTableEntry(
 									invPageTable[frame].getPageIndex())
 							.setAddress(-1);
 					processManager
 							.getPCB(invPageTable[frame].getPid())
-							.getPagteTableEntry(
+							.getPageTableEntry(
 									invPageTable[frame].getPageIndex())
 							.setpBit(false);
-				}
-				// alle Zeilen der neuen Seite einlagern und Bits setzen
+				} // end Else
+				
+				// alle Zeilen der neuen Seite einlagern
 				for (int line = 0; line < BootLoader.PAGESIZE; line++) {
 					memory.setContent(
 							line,
 							secondaryStorage.getStorage(processManager.getPCB(
 									pid).getStorageIndex())[(index * BootLoader.PAGESIZE)
 									+ line]);
-				}
-				processManager.getPCB(pid).getPagteTableEntry(index)
+				} // end For
+				
+				// Bits in der neuen Seitentabelle und invertierter Seitentabelle setzen
+				processManager.getPCB(pid).getPageTableEntry(index)
 						.setpBit(true);
-				processManager.getPCB(pid).getPagteTableEntry(index)
+				processManager.getPCB(pid).getPageTableEntry(index)
 						.setrBit(true);
-				processManager.getPCB(pid).getPagteTableEntry(index)
+				processManager.getPCB(pid).getPageTableEntry(index)
 						.setAddress(frame);
 				invPageTable[frame].setpBit(true);
 				invPageTable[frame].setrBit(true);
@@ -226,18 +236,21 @@ public class MemoryManager implements MemoryManagerIF {
 				invPageTable[frame].setPageIndex(index);
 				found = true;
 
-				// r-Bit der Seite zurücksetzen, falls dies gesetzt war
-			} else {
+				// r-Bit in der alten Seitetabelle zurücksetzen, falls dies gesetzt war
+			} //end If
+			
+			else {
 				invPageTable[frame].setrBit(false);
 				processManager.getPCB(invPageTable[frame].getPid())
-						.getPagteTableEntry(invPageTable[frame].getPageIndex())
+						.getPageTableEntry(invPageTable[frame].getPageIndex())
 						.setrBit(false);
-			}
+			} // end Else
 
 			// wenn zeiger an Listenende angekommen ist, diesen wieder
 			// zurücksetzen für erneuten durchlauf
-			if (frame == (BootLoader.FRAMECOUNT - 1))
+			if (frame == (BootLoader.FRAMECOUNT - 1)) {
 				frame = 0;
+			} //end If
 		}
 	}
 }
