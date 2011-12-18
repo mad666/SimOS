@@ -102,6 +102,8 @@ public class MemoryManager implements MemoryManagerIF {
 				for (int i = 0; i < pagetable.length; i++) {
 					pagetable[i] = new PTEntry();
 				}
+				pcb.setPageTable(pagetable);
+				processManager.PCBTable.put(pcb.getPid(), pcb);
 			}
 			input.close();
 
@@ -141,9 +143,7 @@ public class MemoryManager implements MemoryManagerIF {
 				for (int line = 0; line < BootLoader.PAGESIZE; line++) {
 					memory.setContent(
 							line,
-							secondaryStorage.getStorage(processManager.getPCB(
-									pid).getStorageIndex())[(index * BootLoader.PAGESIZE)
-									+ line]);
+							secondaryStorage.getStorage(processManager.getPCB(pid).getStorageIndex())[(index * BootLoader.PAGESIZE)+ line]);
 				} // end For
 				
 				// Bits in neuer Seitentabelle und invertierter Seitentabelle setzen

@@ -42,11 +42,11 @@ public class MMU {
 	// Adresse wird aufgelöst und an MemeoryManager übergeben
 	public void setMemoryCell(int address, String line, PCB pcb)
 			throws AccessViolation {
-		if (address < 0 || address > regSet.getLimit()) {
-			SysLogger.writeLog(0, "MMU.setMemoryCell: access violation: "
-					+ address);
-			throw new AccessViolation();
-		}
+//		if (address < 0 || address > regSet.getLimit()) {
+//			SysLogger.writeLog(0, "MMU.setMemoryCell: access violation: "
+//					+ address);
+//			throw new AccessViolation();
+//		}
 		int index = address / BootLoader.PAGESIZE;
 		int offset = address % BootLoader.PAGESIZE;
 		if (inMemory(pcb.getPageTable(), index)) {
@@ -66,11 +66,11 @@ public class MMU {
 	// einzelne Zeile aus Haupspeicher lesen
 	// Adresse wird aufgelöst und an MemeoryManager übergeben
 	public String getMemoryCell(int address, PCB pcb) throws AccessViolation {
-		if (address < 0 || address > regSet.getLimit()) {
-			SysLogger.writeLog(0, "MMU.getMemoryCell: access violation: "
-					+ address);
-			throw new AccessViolation();
-		}
+//		if (address < 0 || address > regSet.getLimit()) {
+//			SysLogger.writeLog(0, "MMU.getMemoryCell: access violation: "
+//					+ address);
+//			throw new AccessViolation();
+//		}
 		int index = address / BootLoader.PAGESIZE;
 		int offset = address % BootLoader.PAGESIZE;
 		if (inMemory(pcb.getPageTable(), index)) {

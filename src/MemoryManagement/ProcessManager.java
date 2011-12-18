@@ -40,7 +40,7 @@ public class ProcessManager {
 			parentConsole.incRefCount();
 		}
 		// Einfügen in die PCB Tabelle
-		PCBTable.put(pidCounter, pcb);
+//		PCBTable.put(pidCounter, pcb);
 		SysLogger.writeLog(0,
 				"ProcessManagment.createProcess: " + pcb.toString());
 		// Beim Scheduler anmelden
