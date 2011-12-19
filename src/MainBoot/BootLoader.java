@@ -20,7 +20,7 @@ public class BootLoader {
 		SysLogger.openLog();
 
 		// Hardware Initialisierung
-		MainMemory memory = new MainMemory((FRAMECOUNT * PAGESIZE)-1);
+		MainMemory memory = new MainMemory(FRAMECOUNT * PAGESIZE);
 		SecondaryStorage secondaryStorage = new SecondaryStorage();
 		MMU mmu = new MMU();
 		CPU cpu = new CPU(mmu);
