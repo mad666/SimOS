@@ -15,13 +15,76 @@ CPU.executeTimeslice: pc: 4, command: read 20
 IO.read: adding event to read queue [type:0, id:1, address:20, content:null]
 Scheduler.block: process 1 is waiting for event [type:0, id:1, address:20, content:null]
 Scheduler.block: switching to idle process
-IO.receiveReadContent: received: 'exit' from console 1
-IO.receiveReadContent: adding event to result queue [type:0, id:1, address:20, content:exit]
-CPU.executeTimeslice: interrupt for event [type:0, id:1, address:20, content:exit]
-Scheduler.unblock: received event [type:0, id:1, address:20, content:exit]
+IO.receiveReadContent: received: 'bsp' from console 1
+IO.receiveReadContent: adding event to result queue [type:0, id:1, address:20, content:bsp]
+CPU.executeTimeslice: interrupt for event [type:0, id:1, address:20, content:bsp]
+Scheduler.unblock: received event [type:0, id:1, address:20, content:bsp]
 Scheduler.unblock: process 1 is returning from sleeping
 Scheduler.timesliceOver: process 0 is suspended
 Scheduler.timesliceOver: switching to process 1
 CPU.executeTimeslice: pc: 5, command: load 1 20
 CPU.executeTimeslice: pc: 6, command: load 2 #exit
 CPU.executeTimeslice: pc: 7, command: jeq 11
+CPU.executeTimeslice: pc: 8, command: create_process 20
+MemoryManager.loadProgram: bsp with size 100
+ProcessManagment.createProcess: [pid 2 priority 0 base 0 limit 0]
+Scheduler.addProcess: new process 2 added, readylist length: 1
+CPU.executeTimeslice: pc: 9, command: wait 1
+Scheduler.block: process 1 is waiting for event [type:2, id:2, address:-1, content:null]
+Scheduler.block: switching to process 2
+CPU.executeTimeslice: pc: 0, command: create_console
+IO.createConsole: new console [id: 2, title: Prozess 2]
+CPU.executeTimeslice: pc: 1, command: write_val Zahl1>
+CPU.executeTimeslice: pc: 2, command: read 50
+IO.read: adding event to read queue [type:0, id:2, address:50, content:null]
+Scheduler.block: process 2 is waiting for event [type:0, id:2, address:50, content:null]
+Scheduler.block: switching to idle process
+IO.receiveReadContent: received: '2' from console 2
+IO.receiveReadContent: adding event to result queue [type:0, id:2, address:50, content:2]
+CPU.executeTimeslice: interrupt for event [type:0, id:2, address:50, content:2]
+Scheduler.unblock: received event [type:0, id:2, address:50, content:2]
+Scheduler.unblock: process 2 is returning from sleeping
+Scheduler.timesliceOver: process 0 is suspended
+Scheduler.timesliceOver: switching to process 2
+CPU.executeTimeslice: pc: 3, command: load 1 50
+CPU.executeTimeslice: pc: 4, command: load 2 #q
+CPU.executeTimeslice: pc: 5, command: jeq 15
+CPU.executeTimeslice: pc: 6, command: write_val Zahl\00202>
+CPU.executeTimeslice: pc: 7, command: read 51
+IO.read: adding event to read queue [type:0, id:2, address:51, content:null]
+Scheduler.block: process 2 is waiting for event [type:0, id:2, address:51, content:null]
+Scheduler.block: switching to idle process
+IO.receiveReadContent: received: '4' from console 2
+IO.receiveReadContent: adding event to result queue [type:0, id:2, address:51, content:4]
+CPU.executeTimeslice: interrupt for event [type:0, id:2, address:51, content:4]
+Scheduler.unblock: received event [type:0, id:2, address:51, content:4]
+Scheduler.unblock: process 2 is returning from sleeping
+Scheduler.timesliceOver: process 0 is suspended
+Scheduler.timesliceOver: switching to process 2
+CPU.executeTimeslice: pc: 8, command: load 2 51
+CPU.executeTimeslice: pc: 9, command: add 1 2
+CPU.executeTimeslice: pc: 10, command: write_reg 1
+CPU.executeTimeslice: pc: 11, command: write_nl
+CPU.executeTimeslice: pc: 12, command: read 20
+IO.read: adding event to read queue [type:0, id:2, address:20, content:null]
+Scheduler.block: process 2 is waiting for event [type:0, id:2, address:20, content:null]
+Scheduler.block: switching to idle process
+IO.receiveReadContent: received: 'q' from console 2
+IO.receiveReadContent: adding event to result queue [type:0, id:2, address:20, content:q]
+CPU.executeTimeslice: interrupt for event [type:0, id:2, address:20, content:q]
+Scheduler.unblock: received event [type:0, id:2, address:20, content:q]
+Scheduler.unblock: process 2 is returning from sleeping
+Scheduler.timesliceOver: process 0 is suspended
+Scheduler.timesliceOver: switching to process 2
+CPU.executeTimeslice: pc: 13, command: load 1 20
+CPU.executeTimeslice: pc: 14, command: load 2 #exit
+CPU.executeTimeslice: pc: 15, command: jeq 11
+CPU.executeTimeslice: pc: 16, command: bsp
+CPU.executeCommand: Syntax Error
+Scheduler.endProcess: process 2 is ending
+ProcessManagment.destroyProcess: [pid 2 priority 4 base 0 limit 0]
+ProcessManagment.destroyProcess: destroying console 2
+Scheduler.endProcess: process 1 is returning from sleeping
+Scheduler.endProcess: switching to process 1
+CPU.executeTimeslice: pc: 10, command: jmp 3
+IO.receiveReadContent: received: 'exit' from console 1
