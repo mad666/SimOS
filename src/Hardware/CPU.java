@@ -112,8 +112,6 @@ public class CPU extends Thread {
 						0,
 						"CPU.executeTimeslice: interrupt for event "
 								+ event.toString());
-//				mmu.setAbsoluteAddress(event.getAddress(), event.getContent(),
-//						processManager.getPCB(scheduler.getRunningPid()));
 				mmu.setAbsoluteAddress(event.getAddress(), event.getContent(),
 				processManager.getPCB(event.getID()));
 				scheduler.unblock(event);
