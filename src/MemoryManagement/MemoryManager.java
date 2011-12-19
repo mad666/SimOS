@@ -39,7 +39,6 @@ public class MemoryManager implements MemoryManagerIF {
 		invPageTable[processManager.getPCB(pid).getPageTableEntry(index)				.getAddress()].setrBit(true);
 //		secondaryStorage.changeLine(processManager.getPCB(pid).getStorageIndex(), (index*BootLoader.PAGESIZE)+offset, line);
 		memory.setContent(((processManager.getPCB(pid).getPageTableEntry(index)				.getAddress() * BootLoader.PAGESIZE) + offset), line);
-		
 		processManager.getPCB(pid).getPageTableEntry(index).setmBit(true);
 		invPageTable[processManager.getPCB(pid).getPageTableEntry(index)				.getAddress()].setmBit(true);
 

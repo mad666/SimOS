@@ -20,7 +20,7 @@ public class BootLoader {
 		SysLogger.openLog();
 
 		// Hardware Initialisierung
-		MainMemory memory = new MainMemory(FRAMECOUNT * PAGESIZE);
+		MainMemory memory = new MainMemory((FRAMECOUNT * PAGESIZE)-1);
 		SecondaryStorage secondaryStorage = new SecondaryStorage();
 		MMU mmu = new MMU();
 		CPU cpu = new CPU(mmu);
@@ -52,7 +52,7 @@ public class BootLoader {
 		// Starten der CPU
 		SysLogger.writeLog(0, "BootLoader: starting the cpu");
 		try {
-//			cpu.startTimer();
+			cpu.startTimer();
 			cpu.operate();
 		} catch (ShutdownException x) {
 			SysLogger.writeLog(0, "BootLoader: shutting down");
