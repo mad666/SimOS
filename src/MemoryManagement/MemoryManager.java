@@ -36,11 +36,10 @@ public class MemoryManager implements MemoryManagerIF {
 	// den übergeben Wert in den Speicher
 	public void setContent(int index, int offset, String line, int pid) {
 		processManager.getPCB(pid).getPageTableEntry(index).setrBit(true);
-		invPageTable[processManager.getPCB(pid).getPageTableEntry(index)				.getAddress()].setrBit(true);
-//		secondaryStorage.changeLine(processManager.getPCB(pid).getStorageIndex(), (index*BootLoader.PAGESIZE)+offset, line);
-		memory.setContent(((processManager.getPCB(pid).getPageTableEntry(index)				.getAddress() * BootLoader.PAGESIZE) + offset), line);
+		invPageTable[processManager.getPCB(pid).getPageTableEntry(index).getAddress()].setrBit(true);
+		memory.setContent(((processManager.getPCB(pid).getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE) + offset), line);
 		processManager.getPCB(pid).getPageTableEntry(index).setmBit(true);
-		invPageTable[processManager.getPCB(pid).getPageTableEntry(index)				.getAddress()].setmBit(true);
+		invPageTable[processManager.getPCB(pid).getPageTableEntry(index).getAddress()].setmBit(true);
 
 	}
 
@@ -56,6 +55,39 @@ public class MemoryManager implements MemoryManagerIF {
 				+ offset);
 	}
 
+	
+	//löscht virtuellen Speicher aus dem Sekundärspeicher
+	public void removeStorage(int index) {
+		PCB aktPCB;
+		int aktIndex;
+		for (int i =1; i < processManager.PCBTable.size(); i++) {
+			aktPCB = processManager.PCBTable.elements().nextElement();
+			aktIndex = aktPCB.getStorageIndex();
+			if (aktIndex > index) {
+				aktIndex--;
+				aktPCB.setStorageIndex(aktIndex);
+			}
+		}
+		secondaryStorage.deleteElement(index);
+	}
+	
+	// beim Beenden eines Prozesses soll der Speicher wieder freigegeben werden, daher pBit auf false, falls noch Seiten des Prozesses eingelagert sind
+	public void freeMemory (int pid) {
+		for (int frame = 0; frame < BootLoader.FRAMECOUNT; frame++) {
+			if (invPageTable[frame].getPid()==pid) {
+				invPageTable[frame].setpBit(false);
+			}
+		}
+	}
+	
+	// r-Bits aller eingelagerten Seiten zurücksetzen
+	public void resetRBits() {
+		for (int frame = 0; frame < BootLoader.FRAMECOUNT; frame++) {
+			invPageTable[frame].setrBit(false);
+			processManager.getPCB(invPageTable[frame].getPid()).getPageTableEntry(invPageTable[frame].getPageIndex()).setrBit(false);
+		}
+	}
+	
 	// Programm bei Prozesserstellung laden
 	// liest die Befehle aus der Programmdatei, erstellt den virtuelle Speicher
 	// und erstell die Seitentabelle
@@ -115,16 +147,6 @@ public class MemoryManager implements MemoryManagerIF {
 		return 0;
 	}
 
-	// r-Bits aller eingelagerten Seiten zurücksetzen
-	public void resetRBits() {
-		for (int frame = 0; frame < BootLoader.FRAMECOUNT; frame++) {
-			invPageTable[frame].setrBit(false);
-			processManager.getPCB(invPageTable[frame].getPid())
-					.getPageTableEntry(invPageTable[frame].getPageIndex())
-					.setrBit(false);
-		}
-	}
-
 	// Seitenersetzung
 
 	// zu verdrängende Seite wird mit Clock Algotithmus ermittelt
@@ -136,7 +158,7 @@ public class MemoryManager implements MemoryManagerIF {
 		// prüfen, ob ein Frame noch ungenutzt ist und ggf. Seite dort einlagern
 		for (int frame = 0; frame < BootLoader.FRAMECOUNT && found != true; frame++) {
 			// pid = -2 zeigt ungenutzen Frame an
-			if (invPageTable[frame].getPid() == -2) {
+			if (!invPageTable[frame].getpBit()) {
 				// alle Zeilen der neuen Seite Seite einlagern
 				for (int line = 0; line < BootLoader.PAGESIZE; line++) {
 					memory.setContent((frame * BootLoader.PAGESIZE)+ line,	secondaryStorage.getStorage(processManager.getPCB(pid).getStorageIndex())[(index * BootLoader.PAGESIZE)+ line]);

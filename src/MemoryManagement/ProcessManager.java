@@ -39,8 +39,6 @@ public class ProcessManager {
 			pcb.getRegisterSet().setConsole(parentConsole);
 			parentConsole.incRefCount();
 		}
-		// Einfügen in die PCB Tabelle
-//		PCBTable.put(pidCounter, pcb);
 		SysLogger.writeLog(0,
 				"ProcessManagment.createProcess: " + pcb.toString());
 		// Beim Scheduler anmelden
@@ -63,6 +61,10 @@ public class ProcessManager {
 				console.dispose();
 			}
 		}
+		// Sekundärspeicher und Hauptspeicher freigeben
+		((MemoryManager) memoryManager).removeStorage(pcb.getStorageIndex());
+		((MemoryManager) memoryManager).freeMemory(pcb.getPid());
+		//PCB aus Prozesstabelle löschen
 		PCBTable.remove(pid);
 	}
 

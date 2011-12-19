@@ -8,7 +8,7 @@ public class InvPTEntry extends PTEntry {
 	// Konstruktoren
 	public InvPTEntry() {
 		super();
-		this.pid = -2;
+		this.pid = -1;
 		this.pageindex = -1;
 	}
 
