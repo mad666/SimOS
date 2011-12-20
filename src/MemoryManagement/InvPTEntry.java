@@ -3,19 +3,16 @@ package MemoryManagement;
 public class InvPTEntry extends PTEntry {
 	// Attribute
 	private int pid;
-	private int pageindex;
 
 	// Konstruktoren
 	public InvPTEntry() {
 		super();
 		this.pid = -1;
-		this.pageindex = -1;
 	}
 
-	public InvPTEntry(int pid, int pageindex) {
+	public InvPTEntry(int pid) {
 		super();
 		this.pid = pid;
-		this.pageindex = pageindex;
 	}
 
 	// Setter & Getter
@@ -26,13 +23,5 @@ public class InvPTEntry extends PTEntry {
 	
 	public int getPid() {
 		return pid;
-	}
-
-	public void setPageIndex (int index){
-		this.pageindex = index;
-	}
-	
-	public int getPageIndex() {
-		return pageindex;
 	}
 }

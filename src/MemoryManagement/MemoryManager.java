@@ -84,7 +84,7 @@ public class MemoryManager implements MemoryManagerIF {
 	public void resetRBits() {
 		for (int frame = 0; frame < BootLoader.FRAMECOUNT; frame++) {
 			invPageTable[frame].setrBit(false);
-			processManager.getPCB(invPageTable[frame].getPid()).getPageTableEntry(invPageTable[frame].getPageIndex()).setrBit(false);
+			processManager.getPCB(invPageTable[frame].getPid()).getPageTableEntry(invPageTable[frame].getAddress()).setrBit(false);
 		}
 	}
 	
@@ -173,9 +173,8 @@ public class MemoryManager implements MemoryManagerIF {
 						.setAddress(frame);
 				invPageTable[frame].setpBit(true);
 				invPageTable[frame].setrBit(true);
-				invPageTable[frame].setAddress(frame);
 				invPageTable[frame].setPid(pid);
-				invPageTable[frame].setPageIndex(index);
+				invPageTable[frame].setAddress(index);
 				found = true;
 			} // end If
 		} // end For
@@ -192,7 +191,7 @@ public class MemoryManager implements MemoryManagerIF {
 						secondaryStorage.changeLine((processManager
 								.getPCB(invPageTable[frame].getPid())
 								.getStorageIndex()), ((invPageTable[frame]
-								.getPageIndex() * BootLoader.PAGESIZE) + line),
+								.getAddress() * BootLoader.PAGESIZE) + line),
 								memory.getContent(frame + line));
 
 					} // end For
@@ -202,17 +201,17 @@ public class MemoryManager implements MemoryManagerIF {
 					processManager
 							.getPCB(invPageTable[frame].getPid())
 							.getPageTableEntry(
-									invPageTable[frame].getPageIndex())
+									invPageTable[frame].getAddress())
 							.setAddress(-1);
 					processManager
 							.getPCB(invPageTable[frame].getPid())
 							.getPageTableEntry(
-									invPageTable[frame].getPageIndex())
+									invPageTable[frame].getAddress())
 							.setmBit(false);
 					processManager
 							.getPCB(invPageTable[frame].getPid())
 							.getPageTableEntry(
-									invPageTable[frame].getPageIndex())
+									invPageTable[frame].getAddress())
 							.setpBit(false);
 				} // end If
 
@@ -222,12 +221,12 @@ public class MemoryManager implements MemoryManagerIF {
 					processManager
 							.getPCB(invPageTable[frame].getPid())
 							.getPageTableEntry(
-									invPageTable[frame].getPageIndex())
+									invPageTable[frame].getAddress())
 							.setAddress(-1);
 					processManager
 							.getPCB(invPageTable[frame].getPid())
 							.getPageTableEntry(
-									invPageTable[frame].getPageIndex())
+									invPageTable[frame].getAddress())
 							.setpBit(false);
 				} // end Else
 				
@@ -249,9 +248,8 @@ public class MemoryManager implements MemoryManagerIF {
 						.setAddress(frame);
 				invPageTable[frame].setpBit(true);
 				invPageTable[frame].setrBit(true);
-				invPageTable[frame].setAddress(frame);
 				invPageTable[frame].setPid(pid);
-				invPageTable[frame].setPageIndex(index);
+				invPageTable[frame].setAddress(index);
 				found = true;
 
 				// r-Bit in der alten Seitetabelle zurücksetzen, falls dies gesetzt war
@@ -260,7 +258,7 @@ public class MemoryManager implements MemoryManagerIF {
 			else {
 				invPageTable[frame].setrBit(false);
 				processManager.getPCB(invPageTable[frame].getPid())
-						.getPageTableEntry(invPageTable[frame].getPageIndex())
+						.getPageTableEntry(invPageTable[frame].getAddress())
 						.setrBit(false);
 			} // end Else
 

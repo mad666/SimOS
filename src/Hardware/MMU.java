@@ -15,7 +15,7 @@ public class MMU {
 	static public class AccessViolation extends Exception {
 	};
 
-	// KOnstruktor
+	// Konstruktor
 	/** Creates a new instance of MMU */
 	public MMU() {
 	}
