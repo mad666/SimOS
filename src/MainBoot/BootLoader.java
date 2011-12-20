@@ -52,7 +52,7 @@ public class BootLoader {
 		// Starten der CPU
 		SysLogger.writeLog(0, "BootLoader: starting the cpu");
 		try {
-//			cpu.startTimer();
+			cpu.startTimer();
 			cpu.operate();
 		} catch (ShutdownException x) {
 			SysLogger.writeLog(0, "BootLoader: shutting down");

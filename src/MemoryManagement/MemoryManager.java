@@ -83,8 +83,10 @@ public class MemoryManager implements MemoryManagerIF {
 	// r-Bits aller eingelagerten Seiten zurücksetzen
 	public void resetRBits() {
 		for (int frame = 0; frame < BootLoader.FRAMECOUNT; frame++) {
+			if (invPageTable[frame].getpBit()) {
 			invPageTable[frame].setrBit(false);
 			processManager.getPCB(invPageTable[frame].getPid()).getPageTableEntry(invPageTable[frame].getAddress()).setrBit(false);
+			}
 		}
 	}
 	
