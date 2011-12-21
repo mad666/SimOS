@@ -393,15 +393,9 @@ public class CPU extends Thread {
 	public void startTimer() {
 		new Thread() {
 			public void run() {
-				try {
-					sleep(5000);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
 				while (true) {
 					try {
-						sleep(100); // temporärer Testwert
+						sleep(500); // temporärer Testwert
 						memoryManager.resetRBits();
 					} catch (InterruptedException e) {
 						// gibt kein Fehler

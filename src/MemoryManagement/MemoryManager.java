@@ -215,6 +215,15 @@ public class MemoryManager implements MemoryManagerIF {
 							.getPageTableEntry(
 									invPageTable[frame].getAddress())
 							.setpBit(false);
+					processManager
+					.getPCB(invPageTable[frame].getPid())
+					.getPageTableEntry(
+							invPageTable[frame].getAddress())
+					.setrBit(false);
+					invPageTable[frame].setmBit(false);
+					invPageTable[frame].setrBit(false);
+					invPageTable[frame].setpBit(false);
+					invPageTable[frame].setAddress(-1);
 				} // end If
 
 				// falls Seite nicht gesichert werden muss, nur Bits in der
