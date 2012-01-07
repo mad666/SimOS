@@ -47,6 +47,7 @@ public class CPU extends Thread {
 			if (executeTimeslice(numInstructions) != blocked) {
 				scheduler.timesliceOver();
 			}
+			memoryManager.resetRBits();
 		}
 	}
 
@@ -390,19 +391,19 @@ public class CPU extends Thread {
 		return blocked + 1;
 	}
 
-	public void startTimer() {
-		new Thread() {
-			public void run() {
-				while (true) {
-					try {
-						sleep(500); // temporärer Testwert
-						memoryManager.resetRBits();
-					} catch (InterruptedException e) {
-						// gibt kein Fehler
-					}
-				}
-
-			}
-		}.start();
-	}
+//	public void startTimer() {
+//		new Thread() {
+//			public void run() {
+//				while (true) {
+//					try {
+//						sleep(500); // temporärer Testwert
+//						memoryManager.resetRBits();
+//					} catch (InterruptedException e) {
+//						// gibt kein Fehler
+//					}
+//				}
+//
+//			}
+//		}.start();
+//	}
 }

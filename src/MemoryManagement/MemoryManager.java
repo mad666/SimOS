@@ -46,13 +46,10 @@ public class MemoryManager implements MemoryManagerIF {
 	// eine Zeile aus dem Speicher lesen
 	// wird nur aufgerufen, wenn die Seite bereits eingelagert ist und gibt die
 	// Zeile aus der angegebenen Adresse zurück
-	public String getContent(int index, int offset, int pid) {
+	public String getContent(int address, int pid) {
 		processManager.getPCB(pid).getPageTableEntry(index).setrBit(true);
-		invPageTable[processManager.getPCB(pid).getPageTableEntry(index)
-				.getAddress()].setrBit(true);
-		return memory.getContent((processManager.getPCB(pid)
-				.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE)
-				+ offset);
+		invPageTable[processManager.getPCB(pid).getPageTableEntry(address / BootLoader.PAGESIZE).getAddress()].setrBit(true);
+		return memory.getContent(address);
 	}
 
 	

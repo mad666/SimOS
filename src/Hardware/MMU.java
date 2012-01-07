@@ -73,12 +73,10 @@ public class MMU {
 //		}
 		int index = address / BootLoader.PAGESIZE;
 		int offset = address % BootLoader.PAGESIZE;
-		if (inMemory(pcb.getPageTable(), index)) {
-			return memoryManager.getContent(index, offset, pcb.getPid());
-		} else {
+		if (!inMemory(pcb.getPageTable(), index)) {
 			memoryManager.replacePage(index, pcb.getPid());
-			return memoryManager.getContent(index, offset, pcb.getPid());
-		}
+		} 
+		return memoryManager.getContent((pcb.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE)+ offset, pcb.getPid());
 	}
 
 	// einzelne Zeile in Haupspeicher lesen
