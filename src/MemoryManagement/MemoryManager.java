@@ -34,12 +34,10 @@ public class MemoryManager implements MemoryManagerIF {
 	// eine Zeile in den Speicher schreiben
 	// wird nur aufgerufen, wenn die Seite bereits eingelagert ist und schreibt
 	// den übergeben Wert in den Speicher
-	public void setContent(int index, int offset, String line, int pid) {
-		processManager.getPCB(pid).getPageTableEntry(index).setrBit(true);
-		invPageTable[processManager.getPCB(pid).getPageTableEntry(index).getAddress()].setrBit(true);
-		memory.setContent(((processManager.getPCB(pid).getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE) + offset), line);
-		processManager.getPCB(pid).getPageTableEntry(index).setmBit(true);
-		invPageTable[processManager.getPCB(pid).getPageTableEntry(index).getAddress()].setmBit(true);
+	public void setContent(int address, String line, int pid) {
+		invPageTable[address / BootLoader.PAGESIZE].setrBit(true);
+		memory.setContent(address, line);
+		invPageTable[address / BootLoader.PAGESIZE].setmBit(true);
 
 	}
 
@@ -47,8 +45,7 @@ public class MemoryManager implements MemoryManagerIF {
 	// wird nur aufgerufen, wenn die Seite bereits eingelagert ist und gibt die
 	// Zeile aus der angegebenen Adresse zurück
 	public String getContent(int address, int pid) {
-		processManager.getPCB(pid).getPageTableEntry(index).setrBit(true);
-		invPageTable[processManager.getPCB(pid).getPageTableEntry(address / BootLoader.PAGESIZE).getAddress()].setrBit(true);
+		invPageTable[address / BootLoader.PAGESIZE].setrBit(true);
 		return memory.getContent(address);
 	}
 
@@ -73,6 +70,7 @@ public class MemoryManager implements MemoryManagerIF {
 		for (int frame = 0; frame < BootLoader.FRAMECOUNT; frame++) {
 			if (invPageTable[frame].getPid()==pid) {
 				invPageTable[frame].setpBit(false);
+				SysLogger.writeLog(0,"MemoryManager.freeMemory: free frame: " + frame);
 			}
 		}
 	}
@@ -172,6 +170,8 @@ public class MemoryManager implements MemoryManagerIF {
 				invPageTable[frame].setrBit(true);
 				invPageTable[frame].setPid(pid);
 				found = true;
+				SysLogger.writeLog(0,"MemoryManager.replacePage: found empty frame at: " + frame);
+				SysLogger.writeLog(0,"MemoryManager.replacePage: putting page " + index + " in frame " + frame);
 			} // end If
 		} // end For
 
@@ -186,6 +186,8 @@ public class MemoryManager implements MemoryManagerIF {
 					for (int line = 0; line < BootLoader.PAGESIZE; line++) {
 						secondaryStorage.changeLine((processManager.getPCB(invPageTable[frame].getPid()).getStorageIndex()), ((invPageTable[frame].getAddress() * BootLoader.PAGESIZE) + line),	memory.getContent(frame + line));
 					} // end For
+					SysLogger.writeLog(0,"MemoryManager.replacePage: found unreferenced frame at: " + frame);
+					SysLogger.writeLog(0,"MemoryManager.replacePage: m-bit set, saving page");
 
 					// da die alte Seite nun nicht mehr eingelagert ist, Bits in der alten
 					// und invertierter Seitentabelle setzen
@@ -204,6 +206,8 @@ public class MemoryManager implements MemoryManagerIF {
 					processManager.getPCB(invPageTable[frame].getPid()).getPageTableEntry(invPageTable[frame].getAddress()).setpBit(false);
 					invPageTable[frame].setAddress(-1);
 					invPageTable[frame].setpBit(false);
+					SysLogger.writeLog(0,"MemoryManager.replacePage: found unreferenced frame at: " + frame);
+					SysLogger.writeLog(0,"MemoryManager.replacePage: m-bit not set");
 				} // end Else
 				
 				// alle Zeilen der neuen Seite einlagern
@@ -220,6 +224,7 @@ public class MemoryManager implements MemoryManagerIF {
 				invPageTable[frame].setPid(pid);
 				invPageTable[frame].setAddress(index);
 				found = true;
+				SysLogger.writeLog(0,"MemoryManager.replacePage: putting page " + index + " in frame " + frame);
 
 				// r-Bit in der alten Seitetabelle zurücksetzen, falls dies gesetzt war
 			} //end If
@@ -227,6 +232,7 @@ public class MemoryManager implements MemoryManagerIF {
 			else {
 				invPageTable[frame].setrBit(false);
 				processManager.getPCB(invPageTable[frame].getPid()).getPageTableEntry(invPageTable[frame].getAddress()).setrBit(false);
+				SysLogger.writeLog(0,"MemoryManager.replacePage: Frame " +  frame + " still referreced, checking next frame");
 			} // end Else
 
 			// wenn zeiger an Listenende angekommen ist, diesen wieder

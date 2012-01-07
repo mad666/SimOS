@@ -49,12 +49,14 @@ public class MMU {
 //		}
 		int index = address / BootLoader.PAGESIZE;
 		int offset = address % BootLoader.PAGESIZE;
-		if (inMemory(pcb.getPageTable(), index)) {
-			memoryManager.setContent(index, offset, line, pcb.getPid());
-		} else {
+		if (!inMemory(pcb.getPageTable(), index)) {
+			SysLogger.writeLog(0, "MMU.setMemoryCell: page fault for process: " + pcb.getPid() + " address: " + address + " [page: " + index + " offset: " + offset + "]");
 			memoryManager.replacePage(index, pcb.getPid());
-			memoryManager.setContent(index, offset, line, pcb.getPid());
+		} else {
+			pcb.getPageTableEntry(index).setrBit(true);
+			pcb.getPageTableEntry(index).setmBit(true);
 		}
+		memoryManager.setContent((pcb.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE) + offset, line, pcb.getPid());
 	}
 
 	// einzelne Zeile aus Haupspeicher lesen
@@ -74,9 +76,12 @@ public class MMU {
 		int index = address / BootLoader.PAGESIZE;
 		int offset = address % BootLoader.PAGESIZE;
 		if (!inMemory(pcb.getPageTable(), index)) {
+			SysLogger.writeLog(0, "MMU.getMemoryCell: page fault for process: " + pcb.getPid() + " address: " + address + " [page: " + index + " offset: " + offset + "]");
 			memoryManager.replacePage(index, pcb.getPid());
-		} 
-		return memoryManager.getContent((pcb.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE)+ offset, pcb.getPid());
+		} else {
+			pcb.getPageTableEntry(index).setrBit(true);
+		}
+		return memoryManager.getContent((pcb.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE) + offset, pcb.getPid());
 	}
 
 	// einzelne Zeile in Haupspeicher lesen
