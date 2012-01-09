@@ -50,7 +50,7 @@ public class MemoryManager implements MemoryManagerIF {
 	}
 
 	
-	//löscht virtuellen Speicher aus dem Sekundärspeicher
+	// virtuellen Speicher aus dem Sekundärspeicher löschen
 	public void removeStorage(int index) {
 		PCB aktPCB;
 		int aktIndex;
@@ -60,19 +60,19 @@ public class MemoryManager implements MemoryManagerIF {
 			if (aktIndex > index) {
 				aktIndex--;
 				aktPCB.setStorageIndex(aktIndex);
-			}
-		}
+			} // end If
+		} // End for
 		secondaryStorage.deleteElement(index);
 	}
 	
-	// beim Beenden eines Prozesses soll der Speicher wieder freigegeben werden, daher pBit auf false, falls noch Seiten des Prozesses eingelagert sind
+	// beim Beenden eines Prozesses soll der Speicher wieder freigegeben werden, daher p-Bit auf false, falls noch Seiten des Prozesses eingelagert sind
 	public void freeMemory (int pid) {
 		for (int frame = 0; frame < BootLoader.FRAMECOUNT; frame++) {
 			if (invPageTable[frame].getPid()==pid) {
 				invPageTable[frame].setpBit(false);
 				SysLogger.writeLog(0,"MemoryManager.freeMemory: free frame: " + frame);
-			}
-		}
+			} // end If
+		} // end For
 	}
 	
 	// r-Bits aller eingelagerten Seiten zurücksetzen
@@ -81,8 +81,8 @@ public class MemoryManager implements MemoryManagerIF {
 			if (invPageTable[frame].getpBit()) {
 			invPageTable[frame].setrBit(false);
 			processManager.getPCB(invPageTable[frame].getPid()).getPageTableEntry(invPageTable[frame].getAddress()).setrBit(false);
-			}
-		}
+			} // end If
+		} // end For
 	}
 	
 	// Programm bei Prozesserstellung laden
@@ -90,17 +90,22 @@ public class MemoryManager implements MemoryManagerIF {
 	// und erstell die Seitentabelle
 	public int loadProgram(String file, PCB pcb) {
 		try {
+			
+			// Programmdatei öffnen
 			BufferedReader input = new BufferedReader(new FileReader(file));
+			
+			// In der ersten Zeile steht der benötigte Speicherplatz.
 			String line = input.readLine();
 			int size = 0;
 			if (line != null) {
-				// In der ersten Zeile steht der benötigte Speicherplatz.
 				size = Integer.valueOf(line);
+				
+				// prüfen, ob die maximale Göße des virtuellen Speichers überschritten wurde
 				if (size > (BootLoader.VIRTMEMSIZE * BootLoader.PAGESIZE)) {
 					SysLogger.writeLog(0, "MemoryManager.loadProgram: " + file
 							+ " maximum Virtual Memory Size exceeded!");
 					return -1;
-				}
+				} // end If
 
 				SysLogger.writeLog(0, "MemoryManager.loadProgram: " + file
 						+ " with size " + size);
@@ -109,30 +114,50 @@ public class MemoryManager implements MemoryManagerIF {
 				pcb.getRegisterSet().setProgramCounter(0);
 
 				// Programm einlesen und in virtuellen Speicher legen
-				int count = 0;
-				String[] lines = new String[size];
+//				int count = 0;
+//				String[] lines = new String[size];
+//				line = input.readLine();
+//				while (line != null) {
+//					lines[count] = line;
+//					count++;
+//					line = input.readLine();
+//				} // end While
+				
+				// virtuelle Speicher anlegen
+				String[] virtMem = new String[size];
+				
+				// Programm einlesen und in virtuellen Speicher legen
 				line = input.readLine();
-				while (line != null) {
-					lines[count] = line;
-					count++;
+				for (int index = 0; line != null; index++){
+					virtMem[index] = line;
 					line = input.readLine();
-				}
-				// virtuellen Speicher auslagern
-				pcb.setStorageIndex(secondaryStorage.addElement(lines));
+				} // end For
+				
+				// virtuellen Speicher in Sekundärspeicher auslagern
+				pcb.setStorageIndex(secondaryStorage.addElement(virtMem));
 
 				// Seitentabelle erstellen
 				PTEntry[] pagetable;
-				if ((size % BootLoader.PAGESIZE) == 0)
+				if ((size % BootLoader.PAGESIZE) == 0) {
 					pagetable = new PTEntry[size / BootLoader.PAGESIZE];
-				else
+				} // end If
+			
+				else {
 					pagetable = new PTEntry[(size / BootLoader.PAGESIZE) + 1];
-				for (int i = 0; i < pagetable.length; i++) {
-					pagetable[i] = new PTEntry();
-				}
+				} // end Else
+				
+				// Seitentabelle initialisieren
+				for (int entry = 0; entry < pagetable.length; entry++) {
+					pagetable[entry] = new PTEntry();
+				} // end For
+				
+				// Seitentabelle an PCB anhängen
 				pcb.setPageTable(pagetable);
+				
+				// Prozess in Prozesstabelle einfügen
 				processManager.PCBTable.put(pcb.getPid(), pcb);
-			}
-			input.close();
+			} // end If
+			input.close(); // Programmdatei schließen
 
 			// erste Seite in Hauptspeicher einlagern
 			replacePage(0, pcb.getPid());
@@ -154,9 +179,9 @@ public class MemoryManager implements MemoryManagerIF {
 
 		// prüfen, ob ein Frame noch ungenutzt ist und ggf. Seite dort einlagern
 		for (int frame = 0; frame < BootLoader.FRAMECOUNT && found != true; frame++) {
-			// pid = -2 zeigt ungenutzen Frame an
+			// p-Bit nicht gesetzt = leerer Frame
 			if (!invPageTable[frame].getpBit()) {
-				// alle Zeilen der neuen Seite Seite einlagern
+				// alle Zeilen der neuen Seite Speicher einlagern
 				for (int line = 0; line < BootLoader.PAGESIZE; line++) {
 					memory.setContent((frame * BootLoader.PAGESIZE) + line, secondaryStorage.getStorage(processManager.getPCB(pid).getStorageIndex())[(index * BootLoader.PAGESIZE) + line]);
 				} // end For
@@ -178,11 +203,11 @@ public class MemoryManager implements MemoryManagerIF {
 		// falls keine freier Frame gefunden wurde, nun Clock ausführen
 		for (int frame = 0; frame < BootLoader.FRAMECOUNT && found != true; frame++) {
 
-			// r-Bit = false zeigt ungenutze Seite im lezten Timerintervall an
-			if (invPageTable[frame].getrBit() == false) {
+			// r-Bit nicht getzt zeigt ungenutze Seite im lezten Timerintervall an
+			if (!invPageTable[frame].getrBit()) {
 
 				// alte Seite zurücksichern, falls diese geändert wurde
-				if (invPageTable[frame].getmBit() == true) {
+				if (invPageTable[frame].getmBit()) {
 					for (int line = 0; line < BootLoader.PAGESIZE; line++) {
 						secondaryStorage.changeLine((processManager.getPCB(invPageTable[frame].getPid()).getStorageIndex()), ((invPageTable[frame].getAddress() * BootLoader.PAGESIZE) + line),	memory.getContent((frame * BootLoader.PAGESIZE) + line));
 					} // end For
@@ -225,10 +250,9 @@ public class MemoryManager implements MemoryManagerIF {
 				invPageTable[frame].setAddress(index);
 				found = true;
 				SysLogger.writeLog(0,"MemoryManager.replacePage: putting page " + index + " in frame " + frame);
-
-				// r-Bit in der alten Seitetabelle zurücksetzen, falls dies gesetzt war
 			} //end If
 			
+			// r-Bit in der alten Seitetabelle und invertierten Seitentabelle zurücksetzen, falls dies gesetzt war
 			else {
 				invPageTable[frame].setrBit(false);
 				processManager.getPCB(invPageTable[frame].getPid()).getPageTableEntry(invPageTable[frame].getAddress()).setrBit(false);
@@ -236,7 +260,7 @@ public class MemoryManager implements MemoryManagerIF {
 			} // end Else
 
 			// wenn zeiger an Listenende angekommen ist, diesen wieder
-			// zurücksetzen für erneuten durchlauf
+			// zurücksetzen für erneuten Durchlauf
 			if (frame == (BootLoader.FRAMECOUNT - 1)) {
 				frame = 0;
 			} //end If

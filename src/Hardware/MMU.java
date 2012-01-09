@@ -56,16 +56,17 @@ public class MMU {
 			pcb.getPageTableEntry(index).setrBit(true);
 			pcb.getPageTableEntry(index).setmBit(true);
 		}
-		memoryManager.setContent((pcb.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE) + offset, line, pcb.getPid());
+		int memAddress = (pcb.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE) + offset;
+		memoryManager.setContent(memAddress, line, pcb.getPid());
 	}
 
-	// einzelne Zeile aus Haupspeicher lesen
+	// einzelne Zeile aus Hauptspeicher lesen
 	// Adresse wird aufgelöst und an MemeoryManager übergeben
 	public String getMemoryCell(String address, PCB pcb) throws AccessViolation {
 		return getMemoryCell(Integer.parseInt(address), pcb);
 	}
 
-	// einzelne Zeile aus Haupspeicher lesen
+	// einzelne Zeile aus Hauptspeicher lesen
 	// Adresse wird aufgelöst und an MemeoryManager übergeben
 	public String getMemoryCell(int address, PCB pcb) throws AccessViolation {
 //		if (address < 0 || address > regSet.getLimit()) {
@@ -81,7 +82,8 @@ public class MMU {
 		} else {
 			pcb.getPageTableEntry(index).setrBit(true);
 		}
-		return memoryManager.getContent((pcb.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE) + offset, pcb.getPid());
+		int memAddress = (pcb.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE) + offset;
+		return memoryManager.getContent(memAddress, pcb.getPid());
 	}
 
 	// einzelne Zeile in Haupspeicher lesen
