@@ -158,7 +158,7 @@ public class MemoryManager implements MemoryManagerIF {
 			if (!invPageTable[frame].getpBit()) {
 				// alle Zeilen der neuen Seite Seite einlagern
 				for (int line = 0; line < BootLoader.PAGESIZE; line++) {
-					memory.setContent((frame * BootLoader.PAGESIZE)+ line, secondaryStorage.getStorage(processManager.getPCB(pid).getStorageIndex())[(index * BootLoader.PAGESIZE)+ line]);
+					memory.setContent((frame * BootLoader.PAGESIZE) + line, secondaryStorage.getStorage(processManager.getPCB(pid).getStorageIndex())[(index * BootLoader.PAGESIZE) + line]);
 				} // end For
 				
 				// Bits in neuer Seitentabelle und invertierter Seitentabelle setzen
@@ -184,7 +184,7 @@ public class MemoryManager implements MemoryManagerIF {
 				// alte Seite zurücksichern, falls diese geändert wurde
 				if (invPageTable[frame].getmBit() == true) {
 					for (int line = 0; line < BootLoader.PAGESIZE; line++) {
-						secondaryStorage.changeLine((processManager.getPCB(invPageTable[frame].getPid()).getStorageIndex()), ((invPageTable[frame].getAddress() * BootLoader.PAGESIZE) + line),	memory.getContent(frame + line));
+						secondaryStorage.changeLine((processManager.getPCB(invPageTable[frame].getPid()).getStorageIndex()), ((invPageTable[frame].getAddress() * BootLoader.PAGESIZE) + line),	memory.getContent((frame * BootLoader.PAGESIZE) + line));
 					} // end For
 					SysLogger.writeLog(0,"MemoryManager.replacePage: found unreferenced frame at: " + frame);
 					SysLogger.writeLog(0,"MemoryManager.replacePage: m-bit set, saving page");
@@ -212,7 +212,7 @@ public class MemoryManager implements MemoryManagerIF {
 				
 				// alle Zeilen der neuen Seite einlagern
 				for (int line = 0; line < BootLoader.PAGESIZE; line++) {
-					memory.setContent(line,	secondaryStorage.getStorage(processManager.getPCB(pid).getStorageIndex())[(index * BootLoader.PAGESIZE)	+ line]);
+					memory.setContent((frame * BootLoader.PAGESIZE) + line,secondaryStorage.getStorage(processManager.getPCB(pid).getStorageIndex())[(index * BootLoader.PAGESIZE) + line]);
 				} // end For
 				
 				// Bits in der neuen Seitentabelle und invertierter Seitentabelle setzen
