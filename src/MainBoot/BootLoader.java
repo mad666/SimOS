@@ -22,7 +22,7 @@ public class BootLoader {
 		// Hardware Initialisierung
 		MainMemory memory = new MainMemory(FRAMECOUNT * PAGESIZE);
 		SecondaryStorage secondaryStorage = new SecondaryStorage();
-		MMU mmu = new MMU();
+		MMU mmu = new MMU(memory);
 		CPU cpu = new CPU(mmu);
 
 		// Software Initialisierung

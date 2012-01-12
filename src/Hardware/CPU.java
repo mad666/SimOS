@@ -46,6 +46,7 @@ public class CPU extends Thread {
 			int numInstructions = 9;// + random.nextInt(3);
 			if (executeTimeslice(numInstructions) != blocked) {
 				scheduler.timesliceOver();
+				
 			}
 			memoryManager.resetRBits();
 		}

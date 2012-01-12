@@ -9,6 +9,7 @@ import MemoryManagement.PTEntry;
 public class MMU {
 	// Attribute
 	private MemoryManager memoryManager;
+	private MainMemory memory;
 	private RegisterSet regSet;
 
 	// Innere Anonyme Klasse für Zugriffsfehler
@@ -17,7 +18,8 @@ public class MMU {
 
 	// Konstruktor
 	/** Creates a new instance of MMU */
-	public MMU() {
+	public MMU(MainMemory memory) {
+		this.memory = memory;
 	}
 
 	// Setter & Getter
@@ -54,10 +56,11 @@ public class MMU {
 			memoryManager.replacePage(index, pcb.getPid());
 		} else {
 			pcb.getPageTableEntry(index).setrBit(true);
-			pcb.getPageTableEntry(index).setmBit(true);
 		}
+		pcb.getPageTableEntry(index).setmBit(true);
+		memoryManager.setBitsWrite(pcb.getPageTableEntry(index).getAddress());
 		int memAddress = (pcb.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE) + offset;
-		memoryManager.setContent(memAddress, line, pcb.getPid());
+		memory.setContent(memAddress, line);
 	}
 
 	// einzelne Zeile aus Hauptspeicher lesen
@@ -81,9 +84,10 @@ public class MMU {
 			memoryManager.replacePage(index, pcb.getPid());
 		} else {
 			pcb.getPageTableEntry(index).setrBit(true);
+			memoryManager.setBitsRead(pcb.getPageTableEntry(index).getAddress());
 		}
 		int memAddress = (pcb.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE) + offset;
-		return memoryManager.getContent(memAddress, pcb.getPid());
+		return memory.getContent(memAddress);
 	}
 
 	// einzelne Zeile in Haupspeicher lesen

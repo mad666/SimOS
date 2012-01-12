@@ -2,6 +2,8 @@ package Hardware;
 
 import java.util.ArrayList;
 
+import MemoryManagement.PTEntry;
+
 public class RegisterSet {
     private int programCounter;
     private String register1;
@@ -10,8 +12,17 @@ public class RegisterSet {
     private int limit;
     private SysConsole console;
     private ArrayList<String> stack;
+    private PTEntry[] pageTable;
     
-    /** Creates a new instance of Register */
+    public PTEntry[] getPageTable() {
+		return pageTable;
+	}
+
+	public void setPageTable(PTEntry[] pageTable) {
+		this.pageTable = pageTable;
+	}
+
+	/** Creates a new instance of Register */
     public RegisterSet() {
       stack = new ArrayList<String>();
     }
