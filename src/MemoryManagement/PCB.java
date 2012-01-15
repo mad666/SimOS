@@ -8,7 +8,7 @@ public class PCB {
 	private int priority;
 	private String state;
 	private RegisterSet reg;
-	private PTEntry[] pageTable;
+	//private PTEntry[] pageTable;
 	private int storageIndex;
 
 	// Konstruktor
@@ -49,11 +49,11 @@ public class PCB {
 	}
 
 	public PTEntry[] getPageTable() {
-		return pageTable;
+		return this.reg.getPageTable();
 	}
 
 	public void setPageTable(PTEntry[] pageTable) {
-		this.pageTable = pageTable;
+		this.reg.setPageTable(pageTable);
 	}
 
 	public int getStorageIndex() {
@@ -68,12 +68,12 @@ public class PCB {
 
 	// einzelenen Eintrag der Seintentabelle ändern
 	public void setPageTableEntry(PTEntry ptEntry, int index) {
-		pageTable[index] = ptEntry;
+		this.reg.getPageTable()[index] = ptEntry;
 	}
 
 	// einzelnen Eintrag der Seitentabelle lesen
 	public PTEntry getPageTableEntry(int index) {
-		return pageTable[index];
+		return this.reg.getPageTable()[index];
 	}
 
 	// toString

@@ -45,7 +45,6 @@ public class CPU extends Thread {
 	public void operate() throws BootLoader.ShutdownException {
 		while (true) {
 			if (scheduler.getRunningPid() > 0) {
-			regSet.setPageTable(processManager.getPCB(scheduler.getRunningPid()).getPageTable());
 			mmu.setPageTable(regSet.getPageTable());
 			memoryManager.setRunningPid(scheduler.getRunningPid());
 			}
