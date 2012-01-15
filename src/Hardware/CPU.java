@@ -4,6 +4,7 @@ import Scheduler.SchedulerIF;
 import Scheduler.Event;
 import Hardware.MMU.AccessViolation;
 import MemoryManagement.MemoryManager;
+import MemoryManagement.PTEntry;
 import MemoryManagement.ProcessManager;
 import MainBoot.BootLoader;
 import MainBoot.SysLogger;
@@ -40,9 +41,14 @@ public class CPU extends Thread {
 	public void setMemoryManager(MemoryManager memoryManager) {
 		this.memoryManager = memoryManager;
 	}
-
+	
 	public void operate() throws BootLoader.ShutdownException {
 		while (true) {
+			if (scheduler.getRunningPid() > 0) {
+			regSet.setPageTable(processManager.getPCB(scheduler.getRunningPid()).getPageTable());
+			mmu.setPageTable(regSet.getPageTable());
+			memoryManager.setRunningPid(scheduler.getRunningPid());
+			}
 			int numInstructions = 9;// + random.nextInt(3);
 			if (executeTimeslice(numInstructions) != blocked) {
 				scheduler.timesliceOver();
@@ -62,6 +68,7 @@ public class CPU extends Thread {
 		regSet.setRegister1(this.regSet.getRegister1());
 		regSet.setRegister2(this.regSet.getRegister2());
 		regSet.setConsole(this.regSet.getConsole());
+		regSet.setPageTable(this.regSet.getPageTable());
 	}
 
 	public void restoreRegisters(RegisterSet regSet) {
@@ -74,6 +81,7 @@ public class CPU extends Thread {
 		this.regSet.setRegister1(regSet.getRegister1());
 		this.regSet.setRegister2(regSet.getRegister2());
 		this.regSet.setConsole(regSet.getConsole());
+		this.regSet.setPageTable(regSet.getPageTable());
 	}
 
 	private int executeTimeslice(int numInstructions)
@@ -84,18 +92,13 @@ public class CPU extends Thread {
 							// Programmierfehlers sein!
 				String instruction;
 				try {
-					instruction = mmu.getMemoryCell(regSet.getProgramCounter(),
-							processManager.getPCB(scheduler.getRunningPid()));
+					instruction = mmu.getMemoryCell(regSet.getProgramCounter());
 				} catch (MMU.AccessViolation ex) {
 					// Beende den laufenden Prozess
 					scheduler.endProcess();
 					return blocked;
 				}
-				SysLogger.writeLog(
-						0,
-						"CPU.executeTimeslice: pc: "
-								+ regSet.getProgramCounter() + ", command: "
-								+ instruction);
+				SysLogger.writeLog(0,"CPU.executeTimeslice: pc: " + regSet.getProgramCounter() + ", command: " + instruction);
 				if (executeCommand(instruction) == blocked) {
 					return blocked;
 				}
@@ -110,12 +113,10 @@ public class CPU extends Thread {
 			// Nachschauen, ob ein Interrupt vorliegt, und ggf. behandeln
 			Event event = io.getNextEvent();
 			if (event != null && event.getType() == Event.read) {
-				SysLogger.writeLog(
-						0,
-						"CPU.executeTimeslice: interrupt for event "
-								+ event.toString());
-				mmu.setAbsoluteAddress(event.getAddress(), event.getContent(),
-				processManager.getPCB(event.getID()));
+				SysLogger.writeLog(0,"CPU.executeTimeslice: interrupt for event "+ event.toString());
+				mmu.setPageTable(processManager.getPCB(event.getID()).getPageTable());
+				memoryManager.setRunningPid(event.getID());
+				mmu.setAbsoluteAddress(event.getAddress(), event.getContent());
 				scheduler.unblock(event);
 			}
 		}
@@ -201,15 +202,9 @@ public class CPU extends Thread {
 			} else if (cmd[0].equals("store")) {
 				try {
 					if (cmd[1].startsWith("#")) {
-						mmu.setMemoryCell(
-								cmd[2],
-								cmd[1].substring(1),
-								processManager.getPCB(scheduler.getRunningPid()));
+						mmu.setMemoryCell(cmd[2],cmd[1].substring(1));
 					} else {
-						mmu.setMemoryCell(
-								cmd[2],
-								getRegister(cmd[1]),
-								processManager.getPCB(scheduler.getRunningPid()));
+						mmu.setMemoryCell(cmd[2],getRegister(cmd[1]));
 					}
 				} catch (MMU.AccessViolation ex) {
 					io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
@@ -222,9 +217,7 @@ public class CPU extends Thread {
 					setRegister(cmd[1], cmd[2].substring(1));
 				} else {
 					try {
-						setRegister(cmd[1],
-								mmu.getMemoryCell(cmd[2], processManager
-										.getPCB(scheduler.getRunningPid())));
+						setRegister(cmd[1],mmu.getMemoryCell(cmd[2]));
 					} catch (MMU.AccessViolation ex) {
 						io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
 						scheduler.endProcess();
@@ -267,10 +260,8 @@ public class CPU extends Thread {
 					cmd[1] = cmd[1].substring(1, cmd[1].length() - 1);
 					try {
 						String indAddress = mmu
-								.getMemoryCell(cmd[1], processManager
-										.getPCB(scheduler.getRunningPid()));
-						address = mmu.getMemoryCell(indAddress, processManager
-								.getPCB(scheduler.getRunningPid()));
+								.getMemoryCell(cmd[1]);
+						address = mmu.getMemoryCell(indAddress);
 					} catch (MMU.AccessViolation ex) {
 						io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
 						scheduler.endProcess();
@@ -281,8 +272,7 @@ public class CPU extends Thread {
 						// create_process <address>
 						// Die Adresse gibt die Speicherzelle an, in der der
 						// Dateiname steht
-						address = mmu.getMemoryCell(cmd[1], processManager
-								.getPCB(scheduler.getRunningPid()));
+						address = mmu.getMemoryCell(cmd[1]);
 					} catch (MMU.AccessViolation ex) {
 						io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
 						scheduler.endProcess();
@@ -302,11 +292,9 @@ public class CPU extends Thread {
 				// Ein wait-Event mit der id PID wird erstellt.
 				Event event;
 				if (cmd[1].startsWith("#")) {
-					event = new Event(Event.wait, Integer.parseInt(cmd[1]
-							.substring(1)));
+					event = new Event(Event.wait, Integer.parseInt(cmd[1].substring(1)));
 				} else {
-					event = new Event(Event.wait,
-							Integer.parseInt(getRegister(cmd[1])));
+					event = new Event(Event.wait, Integer.parseInt(getRegister(cmd[1])));
 				}
 				// Der Aufrufer wird blockiert
 				scheduler.block(event);
@@ -362,8 +350,7 @@ public class CPU extends Thread {
 
 			} else if (cmd[0].equals("write_mem")) {
 				try {
-					io.write(regSet.getConsole(), mmu.getMemoryCell(cmd[1],
-							processManager.getPCB(scheduler.getRunningPid())));
+					io.write(regSet.getConsole(), mmu.getMemoryCell(cmd[1]));
 				} catch (MMU.AccessViolation ex) {
 					io.write(regSet.getConsole(), "\nACCESS VIOLATION\n");
 					scheduler.endProcess();

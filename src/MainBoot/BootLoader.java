@@ -26,8 +26,7 @@ public class BootLoader {
 		CPU cpu = new CPU(mmu);
 
 		// Software Initialisierung
-		MemoryManagerIF memoryManager = new MemoryManager(memory,
-				secondaryStorage);
+		MemoryManagerIF memoryManager = new MemoryManager(memory,secondaryStorage);
 		ProcessManager processManager = new ProcessManager(memoryManager);
 		SchedulerIF scheduler = new Scheduler(cpu, processManager);
 
@@ -43,16 +42,13 @@ public class BootLoader {
 		cpu.setMemoryManager((MemoryManager) memoryManager);
 		mmu.setMemoryManager((MemoryManager) memoryManager);
 		
-
 		// Erzeugen des Init Prozess
 		int pid = processManager.createProcess("init");
-		SysLogger.writeLog(0, "BootLoader: initial process created, pid: "
-				+ pid);
+		SysLogger.writeLog(0, "BootLoader: initial process created, pid: " + pid);
 
 		// Starten der CPU
 		SysLogger.writeLog(0, "BootLoader: starting the cpu");
 		try {
-//			cpu.startTimer();
 			cpu.operate();
 		} catch (ShutdownException x) {
 			SysLogger.writeLog(0, "BootLoader: shutting down");

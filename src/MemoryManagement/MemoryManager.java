@@ -13,6 +13,7 @@ public class MemoryManager implements MemoryManagerIF {
 	private ProcessManager processManager;
 	private InvPTEntry[] invPageTable;
 	private int clockPointer = 0;
+	private int pid;
 
 	// Konstruktor
 	/** Creates a new instance of MemoryManager */
@@ -28,6 +29,14 @@ public class MemoryManager implements MemoryManagerIF {
 	// Setter & Getter
 	public void setProcessManager(ProcessManager processmanager) {
 		this.processManager = processmanager;
+	}
+	
+	public void setRunningPid(int pid) {
+		this.pid = pid;
+	}
+	
+	public int getRunningPid () {
+		return this.pid;
 	}
 
 	// Funktionen
@@ -150,7 +159,10 @@ public class MemoryManager implements MemoryManagerIF {
 			input.close(); // Programmdatei schließen
 
 			// erste Seite in Hauptspeicher einlagern
-			replacePage(0, pcb.getPid());
+			int oldPid = getRunningPid();
+			setRunningPid(pcb.getPid());
+			replacePage(0);
+			setRunningPid(oldPid);
 
 		} catch (IOException e) {
 			System.err.println(e.toString());
@@ -163,7 +175,7 @@ public class MemoryManager implements MemoryManagerIF {
 
 	// zu verdrängende Seite wird mit Clock Algotithmus ermittelt
 	// Nummer der neu einzulagernde Seite wird übergeben
-	public void replacePage(int index, int pid) {
+	public void replacePage(int index) {
 
 		boolean found = false;
 
@@ -173,7 +185,7 @@ public class MemoryManager implements MemoryManagerIF {
 			if (!invPageTable[frame].getpBit()) {
 				SysLogger.writeLog(0,"MemoryManager.replacePage: found empty frame at: " + frame);
 				// neue Seite im Hauptspeicher einlagern
-				putPage(index, frame, pid);
+				putPage(index, frame);
 				found = true;
 			} // end If
 		} // end For
@@ -210,7 +222,7 @@ public class MemoryManager implements MemoryManagerIF {
 				} // end Else
 				
 				// neue Seite im Hauptspeicher einlagern
-				putPage(index, clockPointer, pid);
+				putPage(index, clockPointer);
 				found = true;
 			} //end If
 			
@@ -229,7 +241,7 @@ public class MemoryManager implements MemoryManagerIF {
 		}
 	}
 	
-	public void putPage(int index, int frame, int pid) {
+	public void putPage(int index, int frame) {
 		// alle Zeilen der neuen Seite einlagern
 		for (int line = 0; line < BootLoader.PAGESIZE; line++) {
 			memory.setContent((frame * BootLoader.PAGESIZE) + line, secondaryStorage.getStorage(processManager.getPCB(pid).getStorageIndex())[(index * BootLoader.PAGESIZE) + line]);

@@ -1,0 +1,12 @@
+100
+create_console
+write_val >
+read 30
+load 1 30
+load 2 #exit
+jeq 10
+create_process 30
+create_process 30
+wait 1
+jmp 1
+quit

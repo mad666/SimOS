@@ -8,9 +8,12 @@ import MemoryManagement.PTEntry;
 
 public class MMU {
 	// Attribute
-	private MemoryManager memoryManager;
 	private MainMemory memory;
 	private RegisterSet regSet;
+	private MemoryManager memoryManager;
+	private PTEntry[] pageTable;
+
+
 
 	// Innere Anonyme Klasse für Zugriffsfehler
 	static public class AccessViolation extends Exception {
@@ -23,6 +26,7 @@ public class MMU {
 	}
 
 	// Setter & Getter
+	
 	public void setRegisterSet(RegisterSet regSet) {
 		this.regSet = regSet;
 	}
@@ -30,63 +34,57 @@ public class MMU {
 	public void setMemoryManager(MemoryManager memoryManager) {
 		this.memoryManager = memoryManager;
 	}
+	
+	public void setPageTable(PTEntry[] pageTable) {
+		this.pageTable = pageTable;
+	}
 
 	// Funktionen
 
 	// einzelne Zeile in Haupspeicher schreiben
 	// Adresse wird aufgelöst und an MemeoryManager übergeben
-	public void setMemoryCell(String address, String line, PCB pcb)
+	public void setMemoryCell(String address, String line)
 			throws AccessViolation {
-		setMemoryCell(Integer.parseInt(address), line, pcb);
+		setMemoryCell(Integer.parseInt(address), line);
 	}
 
 	// einzelne Zeile in Haupspeicher schreiben
 	// Adresse wird aufgelöst und an MemeoryManager übergeben
-	public void setMemoryCell(int address, String line, PCB pcb)
+	public void setMemoryCell(int address, String line)
 			throws AccessViolation {
-//		if (address < 0 || address > regSet.getLimit()) {
-//			SysLogger.writeLog(0, "MMU.setMemoryCell: access violation: "
-//					+ address);
-//			throw new AccessViolation();
-//		}
 		int index = address / BootLoader.PAGESIZE;
 		int offset = address % BootLoader.PAGESIZE;
-		if (!inMemory(pcb.getPageTable(), index)) {
-			SysLogger.writeLog(0, "MMU.setMemoryCell: page fault for process: " + pcb.getPid() + " address: " + address + " [page: " + index + " offset: " + offset + "]");
-			memoryManager.replacePage(index, pcb.getPid());
+		if (!inMemory(pageTable, index)) {
+			SysLogger.writeLog(0, "MMU.setMemoryCell: page fault, address: " + address + " [page: " + index + " offset: " + offset + "]");
+			memoryManager.replacePage(index);
 		} else {
-			pcb.getPageTableEntry(index).setrBit(true);
+			pageTable[index].setrBit(true);
 		}
-		pcb.getPageTableEntry(index).setmBit(true);
-		memoryManager.setBitsWrite(pcb.getPageTableEntry(index).getAddress());
-		int memAddress = (pcb.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE) + offset;
+		pageTable[index].setmBit(true);
+		memoryManager.setBitsWrite(pageTable[index].getAddress());
+		int memAddress = (pageTable[index].getAddress() * BootLoader.PAGESIZE) + offset;
 		memory.setContent(memAddress, line);
 	}
 
 	// einzelne Zeile aus Hauptspeicher lesen
 	// Adresse wird aufgelöst und an MemeoryManager übergeben
-	public String getMemoryCell(String address, PCB pcb) throws AccessViolation {
-		return getMemoryCell(Integer.parseInt(address), pcb);
+	public String getMemoryCell(String address) throws AccessViolation {
+		return getMemoryCell(Integer.parseInt(address));
 	}
 
 	// einzelne Zeile aus Hauptspeicher lesen
 	// Adresse wird aufgelöst und an MemeoryManager übergeben
-	public String getMemoryCell(int address, PCB pcb) throws AccessViolation {
-//		if (address < 0 || address > regSet.getLimit()) {
-//			SysLogger.writeLog(0, "MMU.getMemoryCell: access violation: "
-//					+ address);
-//			throw new AccessViolation();
-//		}
+	public String getMemoryCell(int address) throws AccessViolation {
 		int index = address / BootLoader.PAGESIZE;
 		int offset = address % BootLoader.PAGESIZE;
-		if (!inMemory(pcb.getPageTable(), index)) {
-			SysLogger.writeLog(0, "MMU.getMemoryCell: page fault for process: " + pcb.getPid() + " address: " + address + " [page: " + index + " offset: " + offset + "]");
-			memoryManager.replacePage(index, pcb.getPid());
+		if (!inMemory(pageTable, index)) {
+			SysLogger.writeLog(0, "MMU.getMemoryCell: page fault, address: " + address + " [page: " + index + " offset: " + offset + "]");
+			memoryManager.replacePage(index);
 		} else {
-			pcb.getPageTableEntry(index).setrBit(true);
-			memoryManager.setBitsRead(pcb.getPageTableEntry(index).getAddress());
+			pageTable[index].setrBit(true);
+			memoryManager.setBitsRead(pageTable[index].getAddress());
 		}
-		int memAddress = (pcb.getPageTableEntry(index).getAddress() * BootLoader.PAGESIZE) + offset;
+		int memAddress = (pageTable[index].getAddress() * BootLoader.PAGESIZE) + offset;
 		return memory.getContent(memAddress);
 	}
 
@@ -95,9 +93,9 @@ public class MMU {
 	// früher musste die Adresse nicht mehr aufgelöst werden, da sie bereits im
 	// Event bekannt war, ist auf Grund der neuen Speicherverwaltung zu
 	// kompliziert
-	public void setAbsoluteAddress(int address, String line, PCB pcb) {
+	public void setAbsoluteAddress(int address, String line) {
 		try {
-			setMemoryCell(address, line, pcb);
+			setMemoryCell(address, line);
 		} catch (AccessViolation e) {
 			e.printStackTrace();
 		}
@@ -110,11 +108,6 @@ public class MMU {
 	}
 
 	public int resolveAddress(int address) throws AccessViolation {
-//		if (address < 0 || address > regSet.getLimit()) {
-//			SysLogger.writeLog(0, "MMU.resolveAddress: access violation: "
-//					+ address);
-//			throw new AccessViolation();
-//		}
 		return address;
 	}
 
@@ -123,13 +116,4 @@ public class MMU {
 	public boolean inMemory(PTEntry[] pagetable, int index) {
 		return pagetable[index].getpBit();
 	}
-
-	// Alte Methode, wurde nicht genutzt, möglichweise für Debugging gedaccht
-	// public void dumpMemory( int limit ) {
-	// SysLogger.writeLog( 1, "MMU.dumpMemory" );
-	// for( int i = 0; i < limit; i++ ) {
-	// SysLogger.writeLog( 1, i + ": " + memory.getContent(i) );
-	// }
-	// }
-
 }
