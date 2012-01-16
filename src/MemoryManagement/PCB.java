@@ -8,7 +8,6 @@ public class PCB {
 	private int priority;
 	private String state;
 	private RegisterSet reg;
-	//private PTEntry[] pageTable;
 	private int storageIndex;
 
 	// Konstruktor

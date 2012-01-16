@@ -63,7 +63,7 @@ public class ProcessManager {
 		}
 		// Sekundärspeicher und Hauptspeicher freigeben
 		((MemoryManager) memoryManager).removeStorage(pcb.getStorageIndex());
-		((MemoryManager) memoryManager).freeMemory(pcb.getPid());
+		((MemoryManager) memoryManager).freeMemory(pid);
 		//PCB aus Prozesstabelle löschen
 		PCBTable.remove(pid);
 	}

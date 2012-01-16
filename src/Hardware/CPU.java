@@ -12,7 +12,7 @@ import java.util.*;
 
 public class CPU extends Thread {
 
-	// private int timer; //wird nicht genutzt
+	private int timer; //wird nicht genutzt
 	private RegisterSet regSet;
 	private MMU mmu;
 	private IO io;
@@ -44,8 +44,11 @@ public class CPU extends Thread {
 	
 	public void operate() throws BootLoader.ShutdownException {
 		while (true) {
+			//Kontextwechsel erfordert die Übergabe der neuen Seitentabelle an die MMU
+			//PID > 0 schließt Idle Prozess aus
 			if (scheduler.getRunningPid() > 0) {
 			mmu.setPageTable(regSet.getPageTable());
+			// Außerdem muss auch die PID des aktuelle Prozesses im Memory Manager bekannt sein
 			memoryManager.setRunningPid(scheduler.getRunningPid());
 			}
 			int numInstructions = 9;// + random.nextInt(3);
@@ -53,6 +56,7 @@ public class CPU extends Thread {
 				scheduler.timesliceOver();
 				
 			}
+			// r-Bits für Clock Algorithmus zurücksetzen
 			memoryManager.resetRBits();
 		}
 	}
@@ -113,7 +117,10 @@ public class CPU extends Thread {
 			Event event = io.getNextEvent();
 			if (event != null && event.getType() == Event.read) {
 				SysLogger.writeLog(0,"CPU.executeTimeslice: interrupt for event "+ event.toString());
+				// da bei einem Interrupt immer der Idle prozess aktiv ist, muss zunächst die Seitentabelle des Prozesse,
+				// zu dem der Interrupt gehört in die MMU geladen werden
 				mmu.setPageTable(processManager.getPCB(event.getID()).getPageTable());
+				// wie beim Kontextwechsel muss ebenfalls die PID im MemoryManager akzualisiert werden
 				memoryManager.setRunningPid(event.getID());
 				mmu.setAbsoluteAddress(event.getAddress(), event.getContent());
 				scheduler.unblock(event);

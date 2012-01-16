@@ -61,16 +61,16 @@ public class MemoryManager implements MemoryManagerIF {
 	
 	// virtuellen Speicher aus dem Sekundärspeicher löschen
 	public void removeStorage(int index) {
-		PCB aktPCB;
-		int aktIndex;
-		for (int i =1; i < processManager.PCBTable.size(); i++) {
-			aktPCB = processManager.PCBTable.elements().nextElement();
-			aktIndex = aktPCB.getStorageIndex();
+		// alle Prozesse überprüfen
+		for (PCB pcb : processManager.PCBTable.values()) {
+			int aktIndex = pcb.getStorageIndex();
+			// nur bei Prozessen, die nach dem  zu löschenden im Sekundärspeicher sind, muss die Position im PCB aktualisiert werden
 			if (aktIndex > index) {
 				aktIndex--;
-				aktPCB.setStorageIndex(aktIndex);
+				pcb.setStorageIndex(aktIndex);
 			} // end If
 		} // End for
+		// virtuellen Speicher löschen
 		secondaryStorage.deleteElement(index);
 	}
 	
@@ -193,30 +193,35 @@ public class MemoryManager implements MemoryManagerIF {
 		// falls keine freier Frame gefunden wurde, nun Clock ausführen
 		for (; clockPointer < BootLoader.FRAMECOUNT && found != true; clockPointer++) {
 
+			// alten PCB ,alte Seitentabelle und Seitennummer im aktuellen Rahmen holen
+			int aktPage = invPageTable[clockPointer].getAddress();
+			PCB oldPcb = processManager.getPCB(invPageTable[clockPointer].getPid());
+			PTEntry oldPageTable = oldPcb.getPageTableEntry(aktPage);
+
 			// r-Bit nicht getzt zeigt ungenutze Seite im lezten Timerintervall an
 			if (!invPageTable[clockPointer].getrBit()) {
 
 				// alte Seite zurücksichern, falls diese geändert wurde
 				if (invPageTable[clockPointer].getmBit()) {
 					for (int line = 0; line < BootLoader.PAGESIZE; line++) {
-						secondaryStorage.changeLine((processManager.getPCB(invPageTable[clockPointer].getPid()).getStorageIndex()), ((invPageTable[clockPointer].getAddress() * BootLoader.PAGESIZE) + line),	memory.getContent((clockPointer * BootLoader.PAGESIZE) + line));
+						secondaryStorage.changeLine(oldPcb.getStorageIndex(), ((aktPage * BootLoader.PAGESIZE) + line), memory.getContent((clockPointer * BootLoader.PAGESIZE) + line));
 					} // end For
 					SysLogger.writeLog(0,"MemoryManager.replacePage: found unreferenced frame at: " + clockPointer);
 					SysLogger.writeLog(0,"MemoryManager.replacePage: m-bit set, saving page");
 
 					// da die alte Seite nun nicht mehr eingelagert ist, Bits in der alten
 					// und m-Bit in invertierter Seitentabelle ändern
-					processManager.getPCB(invPageTable[clockPointer].getPid()).getPageTableEntry(invPageTable[clockPointer].getAddress()).setAddress(-1);
-					processManager.getPCB(invPageTable[clockPointer].getPid()).getPageTableEntry(invPageTable[clockPointer].getAddress()).setmBit(false);
-					processManager.getPCB(invPageTable[clockPointer].getPid()).getPageTableEntry(invPageTable[clockPointer].getAddress()).setpBit(false);
+					oldPageTable.setAddress(-1);
+					oldPageTable.setmBit(false);
+					oldPageTable.setpBit(false);
 					invPageTable[clockPointer].setmBit(false);
 				} // end If
 
 				// falls Seite nicht gesichert werden muss, Bits in der
 				// alten Seitentabelle Seitenatbelle ändern
 				else {
-					processManager.getPCB(invPageTable[clockPointer].getPid()).getPageTableEntry(invPageTable[clockPointer].getAddress()).setAddress(-1);
-					processManager.getPCB(invPageTable[clockPointer].getPid()).getPageTableEntry(invPageTable[clockPointer].getAddress()).setpBit(false);
+					oldPageTable.setAddress(-1);
+					oldPageTable.setpBit(false);
 					SysLogger.writeLog(0,"MemoryManager.replacePage: found unreferenced frame at: " + clockPointer);
 					SysLogger.writeLog(0,"MemoryManager.replacePage: m-bit not set");
 				} // end Else
@@ -229,7 +234,7 @@ public class MemoryManager implements MemoryManagerIF {
 			// r-Bit in der alten Seitetabelle und invertierten Seitentabelle zurücksetzen, falls dies gesetzt war
 			else {
 				invPageTable[clockPointer].setrBit(false);
-				processManager.getPCB(invPageTable[clockPointer].getPid()).getPageTableEntry(invPageTable[clockPointer].getAddress()).setrBit(false);
+				oldPageTable.setrBit(false);
 				SysLogger.writeLog(0,"MemoryManager.replacePage: Frame " +  clockPointer + " still referreced, checking next frame");
 			} // end Else
 

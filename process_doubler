@@ -1,6 +1,6 @@
 100
 create_console
-write_val >
+write_val doubleProcess>
 read 30
 load 1 30
 load 2 #exit
