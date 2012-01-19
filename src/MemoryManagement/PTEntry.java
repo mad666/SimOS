@@ -1,3 +1,5 @@
+// Erstellt von Sebastian Säger und Max Richter
+
 package MemoryManagement;
 
 public class PTEntry {

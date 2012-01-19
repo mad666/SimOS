@@ -1,3 +1,5 @@
+// Erstellt von Sebastian Säger und Max Richter
+
 package Hardware;
 
 import java.util.ArrayList;

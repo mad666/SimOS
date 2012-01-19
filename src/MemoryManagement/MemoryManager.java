@@ -1,3 +1,5 @@
+// Geändert von Sebastian Säger und Max Richter
+
 package MemoryManagement;
 
 import Hardware.MainMemory;
@@ -47,7 +49,6 @@ public class MemoryManager implements MemoryManagerIF {
 	public void setBitsWrite(int index) {
 		invPageTable[index].setrBit(true);
 		invPageTable[index].setmBit(true);
-
 	}
 
 	// eine Zeile aus dem Speicher lesen
@@ -55,7 +56,6 @@ public class MemoryManager implements MemoryManagerIF {
 	// Zeile aus der angegebenen Adresse zurück
 	public void setBitsRead(int index) {
 		invPageTable[index].setrBit(true);
-
 	}
 
 	
@@ -64,7 +64,8 @@ public class MemoryManager implements MemoryManagerIF {
 		// alle Prozesse überprüfen
 		for (PCB pcb : processManager.PCBTable.values()) {
 			int aktIndex = pcb.getStorageIndex();
-			// nur bei Prozessen, die nach dem  zu löschenden im Sekundärspeicher sind, muss die Position im PCB aktualisiert werden
+			// nur bei Prozessen, die nach dem  zu löschenden im Sekundärspeicher sind,
+			// muss die Position im PCB aktualisiert werden
 			if (aktIndex > index) {
 				aktIndex--;
 				pcb.setStorageIndex(aktIndex);
@@ -74,7 +75,8 @@ public class MemoryManager implements MemoryManagerIF {
 		secondaryStorage.deleteElement(index);
 	}
 	
-	// beim Beenden eines Prozesses soll der Speicher wieder freigegeben werden, daher p-Bit auf false, falls noch Seiten des Prozesses eingelagert sind
+	// beim Beenden eines Prozesses soll der Speicher wieder freigegeben werden, 
+	// daher p-Bit auf false, falls noch Seiten des Prozesses eingelagert sind
 	public void freeMemory (int pid) {
 		for (int frame = 0; frame < BootLoader.FRAMECOUNT; frame++) {
 			if (invPageTable[frame].getPid()==pid) {
@@ -99,7 +101,6 @@ public class MemoryManager implements MemoryManagerIF {
 	// und erstell die Seitentabelle
 	public int loadProgram(String file, PCB pcb) {
 		try {
-			
 			// Programmdatei öffnen
 			BufferedReader input = new BufferedReader(new FileReader(file));
 			

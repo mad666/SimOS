@@ -1,3 +1,5 @@
+// Geändert von Sebastian Säger und Max Richter
+
 package Hardware;
 
 import Scheduler.SchedulerIF;
@@ -12,7 +14,7 @@ import java.util.*;
 
 public class CPU extends Thread {
 
-	private int timer; //wird nicht genutzt
+	private int timer = 0;
 	private RegisterSet regSet;
 	private MMU mmu;
 	private IO io;
@@ -54,10 +56,8 @@ public class CPU extends Thread {
 			int numInstructions = 9;// + random.nextInt(3);
 			if (executeTimeslice(numInstructions) != blocked) {
 				scheduler.timesliceOver();
-				
 			}
-			// r-Bits für Clock Algorithmus zurücksetzen
-			memoryManager.resetRBits();
+
 		}
 	}
 
@@ -94,6 +94,15 @@ public class CPU extends Thread {
 			if (pc > -1) { // Unschön, könnte auch die Folge eines
 							// Programmierfehlers sein!
 				String instruction;
+				// Prüfen ob Intervall für r-Bit Reset erreicht
+				if (timer > BootLoader.RESETVALUE) {
+					// r-Bits für Clock Algorithmus zurücksetzen
+					memoryManager.resetRBits();
+					// Timer zurücksetzen
+					timer = 0;
+				}
+				else timer++;
+				
 				try {
 					instruction = mmu.getMemoryCell(regSet.getProgramCounter());
 				} catch (MMU.AccessViolation ex) {

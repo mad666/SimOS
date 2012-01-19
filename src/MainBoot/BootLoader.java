@@ -1,3 +1,5 @@
+// Geändert von Sebastian Säger und Max Richter
+
 package MainBoot;
 
 import MemoryManagement.*;
@@ -11,6 +13,7 @@ public class BootLoader {
 	public final static int FRAMECOUNT = 8;
 	public final static int PAGESIZE = 4;
 	public final static int VIRTMEMSIZE = 32;
+	public final static int RESETVALUE = 12;
 
 	static public class ShutdownException extends Exception {
 	};

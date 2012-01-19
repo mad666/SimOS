@@ -1,0 +1,98 @@
+128
+create_console
+write_val Testing\0020Memory...
+load 1 #testword
+load 2 #testword
+store 1 97
+load 1 97
+jne 94
+store 1 98
+load 1 98
+jne 94
+store 1 99
+load 1 99
+jne 94
+store 1 100
+load 1 100
+jne 94
+store 1 101
+load 1 101
+jne 94
+store 1 102
+load 1 102
+jne 94
+store 1 103
+load 1 103
+jne 94
+store 1 104
+load 1 104
+jne 94
+store 1 105
+load 1 105
+jne 94
+store 1 106
+load 1 106
+jne 94
+store 1 107
+load 1 107
+jne 94
+store 1 108
+load 1 108
+jne 94
+store 1 109
+load 1 109
+jne 94
+store 1 110
+load 1 110
+jne 94
+store 1 111
+load 1 111
+jne 94
+store 1 112
+load 1 112
+jne 94
+store 1 113
+load 1 113
+jne 94
+store 1 114
+load 1 114
+jne 94
+store 1 115
+load 1 115
+jne 94
+store 1 116
+load 1 116
+jne 94
+store 1 117
+load 1 117
+jne 94
+store 1 118
+load 1 118
+jne 94
+store 1 119
+load 1 119
+jne 94
+store 1 120
+load 1 120
+jne 94
+store 1 121
+load 1 121
+jne 94
+store 1 122
+load 1 122
+jne 94
+store 1 123
+load 1 123
+jne 94
+store 1 124
+load 1 124
+jne 94
+write_nl
+write_val Test\0020Finished\0020Successfully!
+write_nl
+write_val Press\0020Enter\0020to\0020exit>
+read 127
+quit
+write_nl
+write_val Memory\0020Error!
+jmp 90

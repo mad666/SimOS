@@ -1,3 +1,5 @@
+// Geändert von Sebastian Säger und Max Richter
+
 package MemoryManagement;
 
 import java.util.Hashtable;
