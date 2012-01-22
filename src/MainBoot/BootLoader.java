@@ -13,7 +13,7 @@ public class BootLoader {
 	public final static int FRAMECOUNT = 8;
 	public final static int PAGESIZE = 4;
 	public final static int VIRTMEMSIZE = 32;
-	public final static int RESETVALUE = 12;
+	public final static int RESETVALUE = 18;
 
 	static public class ShutdownException extends Exception {
 	};
