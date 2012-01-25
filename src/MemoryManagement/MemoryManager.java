@@ -181,7 +181,7 @@ public class MemoryManager implements MemoryManagerIF {
 		boolean found = false;
 
 		// prüfen, ob ein Frame noch ungenutzt ist und ggf. Seite dort einlagern
-		for (int frame = 0; frame < BootLoader.FRAMECOUNT && found != true; frame++) {
+		for (int frame = 0; frame < BootLoader.FRAMECOUNT && !found; frame++) {
 			// p-Bit nicht gesetzt = leerer Frame
 			if (!invPageTable[frame].getpBit()) {
 				SysLogger.writeLog(0,"MemoryManager.replacePage: found empty frame at: " + frame);
@@ -192,7 +192,7 @@ public class MemoryManager implements MemoryManagerIF {
 		} // end For
 
 		// falls keine freier Frame gefunden wurde, nun Clock ausführen
-		for (; clockPointer < BootLoader.FRAMECOUNT && found != true; clockPointer++) {
+		for (; clockPointer < BootLoader.FRAMECOUNT && !found; clockPointer++) {
 
 			// alten PCB ,alte Seitentabelle und Seitennummer im aktuellen Rahmen holen
 			int aktPage = invPageTable[clockPointer].getAddress();
